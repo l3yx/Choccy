@@ -1,0 +1,3 @@
+- description: custom java queries
+- queries: .
+  from: choccy/java

@@ -1,0 +1,12 @@
+/assets/
+/web/node_modules/
+/choccy_data
+/favicon.ico
+/index.html
+/choccy
+/choccy.exe
+
+
+.idea/
+.DS_Store
+.vscode/

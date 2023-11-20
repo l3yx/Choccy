@@ -1,0 +1,4 @@
+name: choccy/python
+version: 0.0.0
+dependencies:
+  codeql/python-all: "*"

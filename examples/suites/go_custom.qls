@@ -1,0 +1,3 @@
+- description: custom go queries
+- queries: .
+  from: choccy/go
