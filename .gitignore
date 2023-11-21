@@ -5,6 +5,9 @@
 /index.html
 /choccy
 /choccy.exe
+/choccy_linux_amd64
+/choccy_windows_amd64.exe
+/choccy_darwin_amd64
 
 
 .idea/
