@@ -246,7 +246,7 @@
                 <template #label>
                   <el-tooltip
                       raw-content
-                      content='数据库分析时，需要附加的命令行选项，参考：https://docs.github.com/en/code-security/codeql-cli/codeql-cli-manual/database-analyze#options'
+                      content='数据库分析时，需要附加的命令行选项<br>参考：https://docs.github.com/en/code-security/codeql-cli/codeql-cli-manual/database-analyze#options'
                       placement="top"
                   >
                     <span>CodeQL附加命令行选项</span>
