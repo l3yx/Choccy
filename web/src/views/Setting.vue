@@ -224,7 +224,7 @@
                 <template #label>
                   <el-tooltip
                       raw-content
-                      content='表达式格式参考：https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format<br>另外还支持预定义表达式：@yearly @monthly @weekly @daily @hourly'
+                      content='30 3-6,20-23 * * * (Minutes Hours DayOfMonth Month DayOfWeek)<br>@yearly @monthly @weekly @daily @hourly<br>@every 1h30m10s<br>表达式文档：https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format'
                       placement="top"
                   >
                     <span>定时扫描Cron表达式</span>
