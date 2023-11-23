@@ -347,7 +347,7 @@ const renderedMessage = (message, locations, language) => {
   if(locations){
     let regex = "(";
     locations.forEach(function (location) {
-      regex += `\\[${location.Message}\\]\\(${location.Id}\\)|`
+      regex += `\\[${location.Message.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')}\\]\\(${location.Id}\\)|`
     });
     regex = RegExp(regex.substring(0, regex.length - 1)+")","g");
 
