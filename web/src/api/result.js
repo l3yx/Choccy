@@ -12,6 +12,14 @@ export function getResults(page, pageSize,sortBy, sortOrder,filters) {
     })
 }
 
+export function getResultSarif(fileName) {
+    return request.get('/result/sarif', {
+        params: {
+            fileName
+        }
+    })
+}
+
 export function deleteResult(ID) {
     return request.delete('/result', {
         params: {

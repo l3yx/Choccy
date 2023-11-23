@@ -5,10 +5,12 @@
             table-layout="auto"
             v-loading="loading"
             @filter-change="filterChange"
+            @expand-change="expandChange"
+            row-key="ID"
             :row-class-name="rowClassName_0">
     <el-table-column type="expand">
       <template #default="props">
-        <div style="">
+        <div style="" v-loading="props.row.CodeQLSarif.loading">
           <el-table
               :data="props.row.CodeQLSarif.Results"
               :show-header="false"
@@ -175,7 +177,6 @@
         </el-icon>
       </template>
     </el-table-column>
-
     <el-table-column fixed="right" label="" width="94px">
       <template #header>
         <el-tooltip
@@ -245,7 +246,7 @@
 
 <script setup>
 import {onMounted, reactive, ref} from "vue";
-import {deleteResult, getResults, setIsRead} from "../api/result";
+import {deleteResult, getResults, setIsRead, getResultSarif} from "../api/result";
 import {timeFormatter} from "../utils/formatter";
 import hljs from 'highlight.js'
 import 'highlight.js/styles/default.min.css'
@@ -254,6 +255,17 @@ import {ElMessage} from "element-plus";
 
 const emit = defineEmits(["refresh"]);
 
+const expandChange = (row, expandedRows) =>{
+  if(expandedRows.indexOf(row)!==-1 && row.CodeQLSarif.loading){
+    getResultSarif(row.FileName).then(response => {
+      row.CodeQLSarif = response.data
+      row.CodeQLSarif.loading = false
+    }).catch(err => {
+      row.CodeQLSarif.Results = []
+      row.CodeQLSarif.loading = false
+    })
+  }
+}
 
 const setResultIsRead = (id, read) => {
   let idList = []
@@ -381,7 +393,7 @@ const renderedMessage = (message, locations, language) => {
 
 
 const rowClassName_0 = (row, index) => {
-  if (row.row.CodeQLSarif.Results.length > 0) {
+  if (row.row.ResultCount > 0) {
     return '';
   }
   return 'row-expand-cover';
@@ -428,6 +440,9 @@ const fetchData = () => {
   loading.value = true
   getResults(paginate.currentPage, paginate.pageSize, sort.name, sort.order, JSON.stringify(filters.value)).then(response => {
     tableData.value = response["data"];
+    tableData.value.forEach((element) => {
+      element.CodeQLSarif = {loading:true,Results:[]}
+    });
     paginate.total = response["total"];
     loading.value = false
   }).catch(err => {

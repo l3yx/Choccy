@@ -62,18 +62,6 @@ func GetResult(c *gin.Context) {
 
 	for index, _ := range taskResults {
 		resultFilePath := filepath.Join(settingPath.CodeQlResult, taskResults[index].FileName)
-		codeQLSarif, err := util.ParseSarifFile(resultFilePath)
-		if err != nil {
-			codeQLSarif = &util.CodeQLSarif{}
-			codeQLSarif.NotificationsId = []string{}
-			codeQLSarif.Rules = []string{}
-			codeQLSarif.Packs = []string{}
-			codeQLSarif.Results = make([]util.CodeQLResult, 0)
-			taskResults[index].CodeQLSarif = codeQLSarif
-		} else {
-			taskResults[index].CodeQLSarif = codeQLSarif
-		}
-
 		taskResults[index].Task.Logs = ""
 		taskResults[index].FilePath = resultFilePath
 	}
@@ -81,6 +69,26 @@ func GetResult(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"data":  taskResults,
 		"total": total,
+	})
+}
+
+func GetResultSarif(c *gin.Context) {
+	fileName := c.DefaultQuery("fileName", "unknow")
+	settingPath, err := util.GetSettingPath()
+	if err != nil {
+		panic(err.Error())
+	}
+	resultFilePath := filepath.Join(settingPath.CodeQlResult, fileName)
+	codeQLSarif, err := util.ParseSarifFile(resultFilePath)
+	if err != nil {
+		codeQLSarif = &util.CodeQLSarif{}
+		codeQLSarif.NotificationsId = []string{}
+		codeQLSarif.Rules = []string{}
+		codeQLSarif.Packs = []string{}
+		codeQLSarif.Results = make([]util.CodeQLResult, 0)
+	}
+	c.JSON(200, gin.H{
+		"data": codeQLSarif,
 	})
 }
 
