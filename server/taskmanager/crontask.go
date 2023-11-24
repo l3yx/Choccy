@@ -1,6 +1,5 @@
 package taskmanager
 
-import "C"
 import (
 	"choccy/server/database"
 	"choccy/server/database/model"
