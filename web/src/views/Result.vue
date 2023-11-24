@@ -151,7 +151,7 @@
 <!--        {{ scope.row.CodeQLSarif.Results.length }}-->
 <!--      </template>-->
 <!--    </el-table-column>-->
-    <el-table-column label="结果数量" width="104px" sortable="custom">
+    <el-table-column label="结果数量" prop="ResultCount" width="104px" sortable="custom">
       <template #default="scope">
         {{ scope.row.ResultCount }}
       </template>
