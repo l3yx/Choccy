@@ -186,6 +186,27 @@ func ResolveQueryMetadata(path string) (map[string]interface{}, error) {
 		metadata["tags"] = regexp.MustCompile(`\s+`).Split(value.(string), -1)
 	}
 
+	_, exists = metadata["id"]
+	if !exists {
+		metadata["id"] = ""
+	}
+	_, exists = metadata["kind"]
+	if !exists {
+		metadata["kind"] = ""
+	}
+	_, exists = metadata["precision"]
+	if !exists {
+		metadata["precision"] = ""
+	}
+	_, exists = metadata["problem.severity"]
+	if !exists {
+		metadata["problem.severity"] = ""
+	}
+	_, exists = metadata["security-severity"]
+	if !exists {
+		metadata["security-severity"] = ""
+	}
+
 	return metadata, nil
 }
 
