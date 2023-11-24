@@ -9,7 +9,6 @@ import (
 	"github.com/robfig/cron/v3"
 	"os"
 	"strings"
-	"time"
 )
 
 func GetSetting(c *gin.Context) {
@@ -18,8 +17,11 @@ func GetSetting(c *gin.Context) {
 	if result.Error != nil {
 		panic(result.Error.Error())
 	}
-	if taskmanager.Schedule != nil {
-		setting.CronTaskNextTime = taskmanager.Schedule.Next(time.Now())
+	if taskmanager.TaskCron != nil {
+		for _, entry := range taskmanager.TaskCron.Entries() {
+			setting.CronTaskNextTime = entry.Next
+			break
+		}
 	}
 	c.JSON(200, gin.H{
 		"data": setting,
@@ -37,6 +39,7 @@ func SaveSetting(c *gin.Context) {
 		panic("系统Token不能为空")
 	}
 
+	setting.CronTaskSpec = strings.TrimSpace(setting.CronTaskSpec)
 	_, err = cron.ParseStandard(setting.CronTaskSpec)
 	if err != nil {
 		panic(err.Error())

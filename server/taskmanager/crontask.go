@@ -1,5 +1,6 @@
 package taskmanager
 
+import "C"
 import (
 	"choccy/server/database"
 	"choccy/server/database/model"
@@ -22,8 +23,7 @@ func runProjects() {
 	}
 }
 
-var c *cron.Cron
-var Schedule cron.Schedule
+var TaskCron *cron.Cron
 
 func SetCronTask() error {
 	var setting model.Setting
@@ -32,18 +32,17 @@ func SetCronTask() error {
 		return result.Error
 	}
 
-	schedule, err := cron.ParseStandard(setting.CronTaskSpec)
+	_, err := cron.ParseStandard(setting.CronTaskSpec)
 	if err != nil {
 		return err
 	}
 
-	if c != nil {
-		c.Stop()
+	if TaskCron != nil {
+		TaskCron.Stop()
 	}
-	c = cron.New()
-	_, err = c.AddFunc(setting.CronTaskSpec, runProjects)
-	c.Start()
-	Schedule = schedule
+	TaskCron = cron.New()
+	_, err = TaskCron.AddFunc(setting.CronTaskSpec, runProjects)
+	TaskCron.Start()
 	if err != nil {
 		return err
 	}
