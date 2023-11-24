@@ -131,11 +131,15 @@ func Consumer() {
 					processor.WriteTaskLog(&task, "获取到新版本："+databaseCommit)
 				}
 				processor.SetTaskVersions(&task, []string{databaseCommit})
+				databaseCommitAbbr := databaseCommit
+				if len(databaseCommit) > 7 {
+					databaseCommitAbbr = databaseCommit[:7]
+				}
 				databaseName := fmt.Sprintf("%s__%s__%s__d__%s",
 					task.ProjectOwner,
 					task.ProjectRepo,
 					task.ProjectLanguage,
-					databaseCommit[:7])
+					databaseCommitAbbr)
 				processor.CheckAndRemoveUnValidDatabase(&task, databaseName)
 				databasePath := util.IsCodeQLDatabaseExists(databaseName)
 				if databasePath == "" {
@@ -148,7 +152,7 @@ func Consumer() {
 
 				// 扫描
 				processor.SetTaskStage(&task, 3) // 扫描
-				resultFileName, resultFilePath := processor.Analyze(&task, databasePath, databaseCommit[:7])
+				resultFileName, resultFilePath := processor.Analyze(&task, databasePath, databaseCommitAbbr)
 				codeQLSarif, err := util.ParseSarifFile(resultFilePath)
 				if err != nil {
 					panic("分析结果解析错误：" + err.Error())

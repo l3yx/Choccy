@@ -120,6 +120,9 @@ func GetGithubDatabase(owner string, repo string, language string) (*CodeQlDatab
 	if err != nil {
 		return nil, err
 	}
+	if codeQlDatabase.CommitOid == "" {
+		codeQlDatabase.CommitOid = "null"
+	}
 
 	return &codeQlDatabase, err
 }
