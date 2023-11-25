@@ -39,7 +39,7 @@ docker run \
 --name choccy \
 --restart always \
 -d \
-yuyangjia/choccy:1.0.1 ./choccy
+l3yx/choccy ./choccy
 ```
 
 查看系统初始Token：
