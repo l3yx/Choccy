@@ -21,27 +21,27 @@ func recoveryTask() {
 	}
 
 	if !setting.AutoRecoveryTask {
-		//把任务状态置为失败
+		//Set Task Status to Failed
 		for _, runningAndQueuingTask := range runningAndQueuingTasks {
 			runningAndQueuingTask.Status = -1
-			runningAndQueuingTask.Logs += "任务执行中断\n"
+			runningAndQueuingTask.Logs += "Mission Execution Interruption\n"
 			result = database.DB.Save(runningAndQueuingTask)
 			if result.Error != nil {
 				panic(result.Error.Error())
 			}
 		}
 	} else {
-		//恢复任务，相当于重新执行，要将参数重置，状态恢复到队列中
+		//Recovery task, equivalent to re-executing, to reset the parameters, restore the status to the queue
 		for _, runningAndQueuingTask := range runningAndQueuingTasks {
 			runningAndQueuingTask.Status = 0
 			runningAndQueuingTask.Stage = 0
-			//这个字段是中release模式中获取到的所有新版本（database模式只有一个版本），无论重置与否，都会被重新赋值
+			//This field is all new versions obtained in release mode (only one version in database mode) and will be reassigned regardless of whether it is reset or not
 			runningAndQueuingTask.Versions = []string{}
-			//这俩不要置空，这俩有值了说明扫描结果也已经出了，project表也会标记最后扫描版本，任务恢复只会扫没扫的部分
-			//置空也会导致扫出来的结果关联不到对应的任务数据（现在结果通过id关联，不会通过AResults关联了）
+			//These two should not be empty，These two values show that the scan results have also been out，Project table will also mark the final scan version，Task recovery will only sweep the parts that were not scanned
+			//置Null also causes the scanned results to be not associated with the corresponding task data (now the results are associated by id, not by AR Results)
 			//runningAndQueuingTask.AnalyzedVersions = []string{}
 			//runningAndQueuingTask.Results = []model.TaskResult{}
-			runningAndQueuingTask.Logs += "任务已恢复\n"
+			runningAndQueuingTask.Logs += "Mission has resumed.\n"
 			result = database.DB.Save(runningAndQueuingTask)
 			if result.Error != nil {
 				panic(result.Error.Error())

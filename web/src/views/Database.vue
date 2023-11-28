@@ -4,16 +4,16 @@
             :default-sort="{ prop: sort.name, order: sort.order }"
             table-layout="auto"
             v-loading="loading">
-    <el-table-column prop="Name" label="数据库" sortable="custom" />
-    <el-table-column prop="Extra.database_language" label="语言" sortable="custom"/>
-    <el-table-column prop="Extra.database_linesOfCode" label="代码行数" sortable="custom"/>
-    <el-table-column prop="Extra.database_cliVersion" label="CodeQL版本" sortable="custom"/>
+    <el-table-column prop="Name" label="database" sortable="custom" />
+    <el-table-column prop="Extra.database_language" label="language" sortable="custom"/>
+    <el-table-column prop="Extra.database_linesOfCode" label="Lines of code" sortable="custom"/>
+    <el-table-column prop="Extra.database_cliVersion" label="CodeQL version" sortable="custom"/>
 
-    <el-table-column prop="Extra.database_finalised" label="构建状态" sortable="custom">
+    <el-table-column prop="Extra.database_finalised" label="Build status" sortable="custom">
       <template #default="scope">
         <el-tooltip
             v-if="scope.row.Extra.database_finalised ==='true'"
-            content="构建完成"
+            content="Build completed"
             placement="top"
             :hide-after="10"
         >
@@ -22,7 +22,7 @@
 
         <el-tooltip
             v-if="scope.row.Extra.database_finalised ==='false'"
-            content="构建失败或正在构建中"
+            content="Build failed or is being built"
             placement="top"
             :hide-after="10"
         >
@@ -31,7 +31,7 @@
       </template>
     </el-table-column>
 
-    <el-table-column prop="ModTime" label="修改时间" sortable="custom"
+    <el-table-column prop="ModTime" label="Change the time" sortable="custom"
                      :formatter="(row, col, value, index)=>timeFormatter(value)"
     />
   </el-table>

@@ -114,7 +114,7 @@ func DeleteResult(c *gin.Context) {
 		panic(err.Error())
 	}
 	if filepath.Dir(resultFilePath) != settingPath.CodeQlResult {
-		panic("文件名错误")
+		panic("Wrong file name")
 	}
 
 	result = database.DB.Delete(&taskResult)

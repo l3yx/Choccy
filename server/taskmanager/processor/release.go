@@ -20,10 +20,10 @@ func CheckReleaseUpdates(task *model.Task, lastAnalyzeReleaseTag string, project
 
 	releases, err := util.GetGithubReleases(task.ProjectOwner, task.ProjectRepo)
 	if err != nil {
-		panic("获取项目Release失败：" + err.Error())
+		panic("Failed to get project release:" + err.Error())
 	}
 	if len(releases) == 0 {
-		panic("项目不存在Release")
+		panic("Project does not exist Release")
 	}
 
 	SetProjectLatestVersion(project, releases[0].TagName, releases[0].CreatedAt)
@@ -31,7 +31,7 @@ func CheckReleaseUpdates(task *model.Task, lastAnalyzeReleaseTag string, project
 	var tags []string
 	if strings.TrimSpace(lastAnalyzeReleaseTag) == "" {
 		releaseCount := setting.FirstReleaseCount
-		WriteTaskLog(task, fmt.Sprintf("项目第一次扫描Release，扫描最新的%d个版本，后续扫描将扫增量部分", releaseCount))
+		WriteTaskLog(task, fmt.Sprintf("The project scans the release for the first time, scans the latest %d versions, and subsequent scans will scan the increments.", releaseCount))
 		for index, release := range releases {
 			if index >= releaseCount {
 				break
@@ -53,17 +53,17 @@ func CheckReleaseUpdates(task *model.Task, lastAnalyzeReleaseTag string, project
 }
 
 func DownloadRelease(task *model.Task, tag string) string {
-	WriteTaskLog(task, "下载版本："+tag)
+	WriteTaskLog(task, "Download Version:"+tag)
 	tagSourcePath, err := util.DownloadGithubTag(task.ProjectOwner, task.ProjectRepo, tag)
 	if err != nil {
-		panic("下载失败：" + err.Error())
+		panic("Download failed:" + err.Error())
 	}
-	WriteTaskLog(task, "下载成功，路径："+tagSourcePath)
+	WriteTaskLog(task, "Download successfully, path:"+tagSourcePath)
 	return tagSourcePath
 }
 
 func CreateDatabase(task *model.Task, source string, databaseName string) string {
-	WriteTaskLog(task, "开始构建数据库")
+	WriteTaskLog(task, "Start building the database")
 	stdout, stderr, err, databasePath := util.DatabaseCreate(
 		source,
 		task.ProjectLanguage,
@@ -72,7 +72,7 @@ func CreateDatabase(task *model.Task, source string, databaseName string) string
 	)
 	if err != nil {
 		if !strings.Contains(stderr, "exists and is not an empty directory") {
-			WriteTaskLog(task, "清理构建失败的数据库："+databasePath)
+			WriteTaskLog(task, "Clean up the database that failed to build:"+databasePath)
 			os.RemoveAll(databasePath)
 		}
 		outError := ""
@@ -83,9 +83,9 @@ func CreateDatabase(task *model.Task, source string, databaseName string) string
 				outError += stdoutLine + "\n"
 			}
 		}
-		panic("数据库构建失败：" + outError + stderr)
+		panic("Database build failed:" + outError + stderr)
 	}
-	//writeTaskLog(&task, "数据库构建日志："+stderr)
-	WriteTaskLog(task, "数据库构建完成："+databasePath)
+	//writeTaskLog(&task, "Database build log:"+stderr)
+	WriteTaskLog(task, "Database build completed:"+databasePath)
 	return databasePath
 }

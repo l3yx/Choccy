@@ -28,19 +28,19 @@ func GetNotifications(c *gin.Context) {
 	}
 
 	if totalTasks > status.TotalTasks {
-		notifications = append(notifications, fmt.Sprintf("新增%d个任务", totalTasks-status.TotalTasks))
+		notifications = append(notifications, fmt.Sprintf("Added %d tasks", totalTasks-status.TotalTasks))
 	}
 
 	if completedTasks > status.CompletedTasks {
-		notifications = append(notifications, fmt.Sprintf("%d个任务已执行完成", completedTasks-status.CompletedTasks))
+		notifications = append(notifications, fmt.Sprintf("%d tasks have been executed", completedTasks-status.CompletedTasks))
 	}
 
 	if failedTasks > status.FailedTasks {
-		notifications = append(notifications, fmt.Sprintf("%d个任务执行失败", failedTasks-status.FailedTasks))
+		notifications = append(notifications, fmt.Sprintf("%d tasks failed to execute", failedTasks-status.FailedTasks))
 	}
 
 	if totalResults > status.TotalResults {
-		notifications = append(notifications, fmt.Sprintf("扫到%d条数据", totalResults-status.TotalResults))
+		notifications = append(notifications, fmt.Sprintf("Scanned %d pieces of data", totalResults-status.TotalResults))
 	}
 
 	status.TotalTasks = totalTasks

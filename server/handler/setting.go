@@ -36,7 +36,7 @@ func SaveSetting(c *gin.Context) {
 	}
 
 	if strings.TrimSpace(setting.SystemToken) == "" {
-		panic("系统Token不能为空")
+		panic("System Token cannot be empty")
 	}
 
 	setting.CronTaskSpec = strings.TrimSpace(setting.CronTaskSpec)

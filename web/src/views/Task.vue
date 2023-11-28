@@ -17,10 +17,10 @@
         />
       </template>
     </el-table-column>
-    <el-table-column prop="ProjectName" label="项目名" sortable="custom"/>
-    <el-table-column prop="ProjectLanguage" label="语言" sortable="custom"/>
-    <el-table-column prop="ProjectMode" :formatter="modeFormatter" label="扫描对象" sortable="custom"/>
-    <el-table-column prop="Versions" label="扫描版本" width="100px">
+    <el-table-column prop="ProjectName" label="Item name" sortable="custom"/>
+    <el-table-column prop="ProjectLanguage" label="language" sortable="custom"/>
+    <el-table-column prop="ProjectMode" :formatter="modeFormatter" label="Scan object" sortable="custom"/>
+    <el-table-column prop="Versions" label="Scanned version" width="100px">
       <template #default="scope">
         <el-tag v-for="(item, index) in scope.row.Versions"
                 :key="index"
@@ -30,7 +30,7 @@
         </el-tag>
       </template>
     </el-table-column>
-    <el-table-column prop="ProjectSuite" label="查询套件" width="100px">
+    <el-table-column prop="ProjectSuite" label="query suite" width="100px">
       <template #default="scope">
         <el-tag v-for="(item, index) in scope.row.ProjectSuite"
                 :key="index"
@@ -41,25 +41,25 @@
       </template>
     </el-table-column>
 
-    <el-table-column prop="Stage" label="任务阶段" sortable="custom">
+    <el-table-column prop="Stage" label="mission phase" sortable="custom">
       <template #default="scope">
         <el-icon :size="20" style="margin-top: 8px" v-if="scope.row.Stage === 0">
-          <el-tooltip content="更新检测" placement="top" :hide-after="10">
+          <el-tooltip content="Update detection" placement="top" :hide-after="10">
             <Loading />
           </el-tooltip>
         </el-icon>
         <el-icon  :size="20" style="margin-top: 8px" v-if="scope.row.Stage === 1">
-          <el-tooltip content="资源下载" placement="top" :hide-after="10">
+          <el-tooltip content="Download" placement="top" :hide-after="10">
             <Download />
           </el-tooltip>
         </el-icon>
         <el-icon :size="20" style="margin-top: 8px" v-if="scope.row.Stage === 2">
-          <el-tooltip content="数据库构建" placement="top" :hide-after="10">
+          <el-tooltip content="Database construction" placement="top" :hide-after="10">
             <Setting />
           </el-tooltip>
         </el-icon>
         <el-icon :size="20" style="margin-top: 8px" v-if="scope.row.Stage === 3">
-          <el-tooltip content="数据库分析" placement="top" :hide-after="10">
+          <el-tooltip content="Database analysis" placement="top" :hide-after="10">
            <Search />
           </el-tooltip>
         </el-icon>
@@ -67,20 +67,20 @@
       </template>
     </el-table-column>
 
-    <el-table-column prop="Status" label="任务状态" sortable="custom"
+    <el-table-column prop="Status" label="Task status" sortable="custom"
                      column-key="Status"
                      :filters="[
-                      { text: '队列中', value: 0 },
-                      { text: '执行中', value: 1 },
-                      { text: '执行完成', value: 2 },
-                      { text: '执行失败', value: -1 },
+                      { text: 'in queue', value: 0 },
+                      { text: 'Executing', value: 1 },
+                      { text: 'Execution completed', value: 2 },
+                      { text: 'Execution failed', value: -1 },
                     ]"
                      :filtered-value="filters.status"
     >
       <template #default="scope">
         <el-tooltip
             v-if="scope.row.Status ===0"
-            content="队列中"
+            content="in queue"
             placement="top"
             :hide-after="10"
         >
@@ -91,7 +91,7 @@
         </el-tooltip>
         <el-tooltip
             v-if="scope.row.Status ===1"
-            content="执行中"
+            content="Executing"
             placement="top"
             :hide-after="10"
         >
@@ -100,7 +100,7 @@
         </el-tooltip>
         <el-tooltip
             v-if="scope.row.Status ===2"
-            content="执行完成"
+            content="Execution completed"
             placement="top"
             :hide-after="10"
         >
@@ -109,7 +109,7 @@
         </el-tooltip>
         <el-tooltip
             v-if="scope.row.Status ===-1"
-            content="执行失败"
+            content="Execution failed"
             placement="top"
             :hide-after="10"
         >
@@ -119,18 +119,18 @@
       </template>
     </el-table-column>
 
-    <el-table-column prop="TotalResultsCount" label="结果数量" sortable="custom"/>
-    <el-table-column prop="CreatedAt" label="创建时间" sortable="custom"
+    <el-table-column prop="TotalResultsCount" label="number of results" sortable="custom"/>
+    <el-table-column prop="CreatedAt" label="creation time" sortable="custom"
                      :formatter="(row, col, value, index)=>timeFormatter(value)"/>
 
     <el-table-column
         width="66px"
-        label="查阅"
+        label="Check"
         prop="IsRead"
         column-key="IsRead"
         :filters="[
-          { text: '已读', value: true },
-          { text: '未读', value: false },
+          { text: 'Have read', value: true },
+          { text: 'unread', value: false },
         ]"
         :filtered-value="filters.is_read">
       <template #default="scope">
@@ -145,7 +145,7 @@
     <el-table-column fixed="right" label="" width="50px">
       <template #header>
         <el-tooltip
-            content="全部已读"
+            content="All read"
             placement="left-start"
             :hide-after="10"
         >
@@ -155,7 +155,7 @@
       <template #default="scope">
         <el-tooltip
             v-if="scope.row.IsRead"
-            content="标记为未读"
+            content="Mark as unread"
             placement="left-start"
             :hide-after="10"
         >
@@ -163,7 +163,7 @@
         </el-tooltip>
         <el-tooltip
             v-if="!scope.row.IsRead"
-            content="标记为已读"
+            content="Mark as read"
             placement="left-start"
             :hide-after="10"
         >
@@ -262,7 +262,7 @@ const modeFormatter = (row, col, value, index) => {
   if (value === 0) {
     return "Release";
   } else if (value === 1) {
-    return "原有数据库";
+    return "Original database";
   }
   return value;
 }

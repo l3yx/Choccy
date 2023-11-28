@@ -5,13 +5,13 @@
             :default-sort="{ prop: sort.name, order: sort.order }"
             table-layout="auto"
   >
-    <el-table-column prop="Name" label="文件名" sortable="custom">
+    <el-table-column prop="Name" label="file name" sortable="custom">
       <template #default="scope">
         <el-link type="primary" @click="showQLS(scope.row)">{{ scope.row.Name }}</el-link>
       </template>
     </el-table-column>
-    <el-table-column prop="Extra.suite_description" label="描述" sortable="custom"/>
-    <el-table-column prop="ModTime" label="修改时间"
+    <el-table-column prop="Extra.suite_description" label="describe" sortable="custom"/>
+    <el-table-column prop="ModTime" label="Change the time"
                      sortable="custom"
                      :formatter="(row, col, value, index)=>timeFormatter(value)"
                      />
@@ -20,7 +20,7 @@
         <el-button style="float: right" :icon="Plus" @click="createData" circle/>
       </template>
       <template #default="scope">
-        <el-popconfirm title="确认删除?" :hide-after="0" @confirm="deleteData(scope.row.Name)">
+        <el-popconfirm title="confirm deletion?" :hide-after="0" @confirm="deleteData(scope.row.Name)">
           <template #reference>
             <el-button :icon="Delete" circle style="float: right;margin-left: 6px"/>
           </template>
@@ -54,7 +54,7 @@
         border
         style="margin-top: 10px"
     >
-      <el-descriptions-item label="查询数量">{{ qlsFile.queries.length }}</el-descriptions-item>
+      <el-descriptions-item label="Query quantity">{{ qlsFile.queries.length }}</el-descriptions-item>
     </el-descriptions>
 
     <el-table v-loading="qlsFile.loading"
@@ -156,7 +156,7 @@ const qlsFile = reactive({
 
 const qlsFileChange = () => {
   saveSuiteContent(qlsFile.name, qlsFile.content).then(response => {
-    ElMessage.success("保存成功")
+    ElMessage.success("Saved successfully")
     fetchData()
     showSuiteQueries(qlsFile.path)
   });
@@ -190,14 +190,14 @@ const showQLS = (row) => {
 
 
 const createData = () => {
-  ElMessageBox.prompt('请输入文件名', '', {
+  ElMessageBox.prompt('Please enter a file name', '', {
     confirmButtonText: 'OK',
     cancelButtonText: 'Cancel',
   }).then(({ value }) => {
     if(value && value.trim()!==""){
       createSuite(value).then(response => {
         fetchData();
-        ElMessage.success("创建成功")
+        ElMessage.success("Created successfully")
       })
     }
   })
@@ -206,12 +206,12 @@ const createData = () => {
 const deleteData = (name) => {
   deleteSuite(name).then(response => {
     fetchData();
-    ElMessage.success("删除成功")
+    ElMessage.success("successfully deleted")
   })
 }
 
 const renameData = (oldName) =>{
-  ElMessageBox.prompt('请输入文件名', '', {
+  ElMessageBox.prompt('Please enter a file name', '', {
     confirmButtonText: 'OK',
     cancelButtonText: 'Cancel',
     inputPlaceholder: oldName
@@ -220,7 +220,7 @@ const renameData = (oldName) =>{
       renameSuite(oldName,value).then(response => {
         console.log(1111)
         fetchData();
-        ElMessage.success("重命名成功")
+        ElMessage.success("Rename successful")
       })
     }
   })

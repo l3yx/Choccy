@@ -25,19 +25,19 @@ var index embed.FS
 var examples embed.FS
 
 func run() {
-	//获取命令行参数，只有addr和token
-	addr := flag.String("addr", "0.0.0.0:80", "监听地址和端口")
-	token := flag.String("token", "", "系统Token")
+	//Get command line parameters, only addr and token
+	addr := flag.String("addr", "0.0.0.0:80", "Listening address and port")
+	token := flag.String("token", "", "System Token")
 	flag.Parse()
 
-	//初始化数据目录，数据库，环境变量
+	//Initialize data directory, database, environment variables
 	{
 		storageDir := "choccy_data"
 		util.InitStorageDir(storageDir)
-		// isNew，只在不存在choccy.db时为true，也就是程序第一次启动的时候
+		// isNew, is true only when choccy.db does not exist, that is, when the program is started for the first time
 		isNew := database.InitDB(filepath.Join(util.GetStorageDir(), "choccy.db"))
-		if isNew { // 程序第一次启动进行各项初始化
-			if strings.TrimSpace(*token) == "" { //如果用户不指定token，则随机生成
+		if isNew { // The program starts for the first time and performs various initializations.
+			if strings.TrimSpace(*token) == "" { //If the user does not specify a token, it will be randomly generated
 				*token = util.RandomString(16)
 			}
 			util.MakeDataDir(util.GetStorageDir())
@@ -48,7 +48,7 @@ func run() {
 		util.InitEnv()
 	}
 
-	//设置系统Token
+	//Set system token
 	{
 		if strings.TrimSpace(*token) != "" {
 			database.DB.Model(model.Setting{}).
@@ -56,7 +56,7 @@ func run() {
 		}
 	}
 
-	//初始化任务执行器，恢复未执行的任务
+	//Initialize the task executor and resume unexecuted tasks
 	{
 		taskmanager.InitTask()
 		err := taskmanager.SetCronTask()
@@ -66,7 +66,7 @@ func run() {
 		go taskmanager.Consumer()
 	}
 
-	//注册路由
+	//Register route
 	{
 		gin.SetMode(gin.ReleaseMode)
 		r := gin.Default()

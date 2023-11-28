@@ -26,12 +26,12 @@ func CheckAndRemoveUnValidDatabase(task *model.Task, databaseName string) {
 		panic(err.Error())
 	}
 
-	WriteTaskLog(task, "检查数据库是否有效："+databaseName)
+	WriteTaskLog(task, "Check that the database is valid:"+databaseName)
 
 	databaseYml := filepath.Join(databasePath, "codeql-database.yml")
 	_, err = os.Stat(databaseYml)
 	if os.IsNotExist(err) {
-		WriteTaskLog(task, "数据库目录中不存在codeql-database.yml，删除该无效数据库："+databasePath)
+		WriteTaskLog(task, "There is no codeql-database in the database directory.yml, delete the invalid database:"+databasePath)
 		os.RemoveAll(databasePath)
 		return
 	} else if err != nil {
@@ -44,12 +44,12 @@ func CheckAndRemoveUnValidDatabase(task *model.Task, databaseName string) {
 	}
 	match := regexp.MustCompile(`finalised\s*:\s*(.+)`).FindSubmatch(fileBytes)
 	if len(match) == 0 {
-		WriteTaskLog(task, "codeql-database.yml 中不包含 finalised 字段，删除该无效数据库："+databasePath)
+		WriteTaskLog(task, "codeql-database.The finalised field is not included in yml. Delete the invalid database:"+databasePath)
 		os.RemoveAll(databasePath)
 		return
 	} else {
 		if strings.TrimSpace(string(match[1])) == "false" {
-			WriteTaskLog(task, "codeql-database.yml 中 finalised 为 false，删除该无效数据库："+databasePath)
+			WriteTaskLog(task, "codeql-database.The finalised value in yml is false, and the invalid database is deleted:"+databasePath)
 			os.RemoveAll(databasePath)
 			return
 		}
@@ -71,7 +71,7 @@ func SetTaskStatus(task *model.Task, stats int) {
 		panic(result.Error.Error())
 	}
 
-	task.Status = stats //0-队列中，1-进行中，2=完成，-1-错误
+	task.Status = stats //0-in-queue, 1-in-progress, 2=completion, -1-error
 	task.IsRead = false
 
 	if stats == 2 {
@@ -97,7 +97,7 @@ func SetTaskStatus(task *model.Task, stats int) {
 }
 
 func SetTaskStage(task *model.Task, stage int) {
-	task.Stage = stage //0-判断有无新版本，1-下载新版本，2-编译数据库，3-分析
+	task.Stage = stage //0-Determine whether there is a new version, 1-Download the new version, 2-Compile the database, 3-Analysis
 	task.IsRead = false
 	result := database.DB.Save(task)
 	if result.Error != nil {
@@ -187,17 +187,17 @@ func CreateTaskResult(version string, commit string, fileName string, resultCoun
 }
 
 func Analyze(task *model.Task, databasePath, version string) (string, string) {
-	WriteTaskLog(task, "构建临时查询套件，包含查询："+strings.Join(task.ProjectSuite, " "))
+	WriteTaskLog(task, "Build a temporary query suite containing queries:"+strings.Join(task.ProjectSuite, " "))
 	tmpSuitePath, err := util.GenerateSuite(task.ProjectSuite)
 	if err != nil {
-		panic("构建临时查询套件失败：" + err.Error())
+		panic("Failed to build temporary query suite:" + err.Error())
 	}
-	WriteTaskLog(task, "临时查询套件构建完成："+tmpSuitePath)
+	WriteTaskLog(task, "Temporary query suite build completed:"+tmpSuitePath)
 	defer func() {
-		WriteTaskLog(task, "清理临时查询套件："+tmpSuitePath)
+		WriteTaskLog(task, "Clean up the temporary query suite:"+tmpSuitePath)
 		os.Remove(tmpSuitePath)
 	}()
-	WriteTaskLog(task, "开始分析")
+	WriteTaskLog(task, "Start analysis")
 
 	resultFileName := fmt.Sprintf("%s__%s__%s__%s__%d.sarif", task.ProjectOwner, task.ProjectRepo, task.ProjectLanguage, version, time.Now().Unix())
 	_, stderr, err, outputPath := util.DatabaseAnalyze(
@@ -206,9 +206,9 @@ func Analyze(task *model.Task, databasePath, version string) (string, string) {
 		resultFileName,
 	)
 	if err != nil {
-		panic("分析失败：" + stderr)
+		panic("Analysis failed:" + stderr)
 	}
-	//writeTaskLog(task, "扫描日志: "+stderr)
-	WriteTaskLog(task, "分析完成，分析结果: "+outputPath)
+	//writeTaskLog(task, "Scan log: "+stderr)
+	WriteTaskLog(task, "Analysis completed, analysis results:"+outputPath)
 	return resultFileName, outputPath
 }

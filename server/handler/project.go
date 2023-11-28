@@ -56,14 +56,14 @@ func GetProjects(c *gin.Context) {
 	var total int64
 	database.DB.Model(&model.Project{}).Count(&total)
 
-	//目的是获取更新检测时间间隔
+	//The purpose is to get the update detection interval
 	var setting model.Setting
 	result = database.DB.Take(&setting)
 	if result.Error != nil {
 		panic(result.Error.Error())
 	}
 
-	//最大并发20，去获取最新版本并更新到数据库
+	//The maximum concurrency is 20, get the latest version and update it to the database
 	var wg sync.WaitGroup
 	ch := make(chan int, 20)
 	for index, _ := range projects {
@@ -123,20 +123,20 @@ func SaveProject(c *gin.Context) {
 	urlReg := regexp.MustCompile("^https://github\\.com/([^/]+)/([^/]+)$")
 	matches := urlReg.FindStringSubmatch(project.Url)
 	if len(matches) != 3 {
-		panic(fmt.Sprintf("请填写正确项目地址: %s", urlReg))
+		panic(fmt.Sprintf("Please fill in the correct project address: %s", urlReg))
 	}
-	owner := matches[1] // 提取 owner 字段
-	repo := matches[2]  // 提取 repo 字段
+	owner := matches[1] // Extract owner field
+	repo := matches[2]  // Extract repo fields
 	project.Owner = owner
 	project.Repo = repo
 
 	langReg := regexp.MustCompile("^[a-zA-Z]+$")
 	if !langReg.MatchString(project.Language) {
-		panic(fmt.Sprintf("请填写正确项目语言: %s", langReg))
+		panic(fmt.Sprintf("Please fill in the correct project language: %s", langReg))
 	}
 
 	if len(project.Suite) == 0 {
-		panic(fmt.Sprintf("请选择查询套件"))
+		panic(fmt.Sprintf("Please select query package"))
 	}
 
 	var result *gorm.DB

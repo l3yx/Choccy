@@ -127,16 +127,16 @@
         </div>
       </template>
     </el-table-column>
-    <el-table-column prop="FileName" label="分析结果" sortable="custom"/>
-    <el-table-column prop="Task.ProjectName" label="项目"/>
-    <el-table-column prop="Version" label="扫描版本" width="104px">
+    <el-table-column prop="FileName" label="Analyze results" sortable="custom"/>
+    <el-table-column prop="Task.ProjectName" label="project"/>
+    <el-table-column prop="Version" label="Scanned version" width="104px">
       <template #default="scope">
         {{
           scope.row.Task.ProjectMode === 0 ? scope.row.Version : commitVersionFormatter(scope.row.Version)
         }}
       </template>
     </el-table-column>
-    <el-table-column prop="Task.ProjectSuite" label="查询套件" width="100px">
+    <el-table-column prop="Task.ProjectSuite" label="query suite" width="100px">
       <template #default="scope">
         <el-tag v-for="(item, index) in scope.row.Task.ProjectSuite"
                 :key="index"
@@ -146,26 +146,26 @@
         </el-tag>
       </template>
     </el-table-column>
-<!--    <el-table-column label="漏洞数量" width="104px">-->
+<!--    <el-table-column label="Number of vulnerabilities" width="104px">-->
 <!--      <template #default="scope">-->
 <!--        {{ scope.row.CodeQLSarif.Results.length }}-->
 <!--      </template>-->
 <!--    </el-table-column>-->
-    <el-table-column label="结果数量" prop="ResultCount" width="104px" sortable="custom">
+    <el-table-column label="number of results" prop="ResultCount" width="104px" sortable="custom">
       <template #default="scope">
         {{ scope.row.ResultCount }}
       </template>
     </el-table-column>
-    <el-table-column width="162px" prop="CreatedAt" label="创建时间" sortable="custom"
+    <el-table-column width="162px" prop="CreatedAt" label="creation time" sortable="custom"
                      :formatter="(row, col, value, index)=>timeFormatter(value)"/>
     <el-table-column
         width="66px"
-        label="查阅"
+        label="Check"
         prop="IsRead"
         column-key="IsRead"
         :filters="[
-          { text: '已读', value: true },
-          { text: '未读', value: false },
+          { text: 'Have read', value: true },
+          { text: 'unread', value: false },
         ]"
         :filtered-value="filters.is_read">
       <template #default="scope">
@@ -180,7 +180,7 @@
     <el-table-column fixed="right" label="" width="94px">
       <template #header>
         <el-tooltip
-            content="全部已读"
+            content="All read"
             placement="left-start"
             :hide-after="10"
         >
@@ -190,7 +190,7 @@
       <template #default="scope">
         <el-tooltip
             v-if="scope.row.IsRead"
-            content="标记为未读"
+            content="Mark as unread"
             placement="left-start"
             :hide-after="10"
         >
@@ -198,13 +198,13 @@
         </el-tooltip>
         <el-tooltip
             v-if="!scope.row.IsRead"
-            content="标记为已读"
+            content="Mark as read"
             placement="left-start"
             :hide-after="10"
         >
           <el-button :icon="FolderOpened" circle @click="setResultIsRead(scope.row.ID,true)"/>
         </el-tooltip>
-        <el-popconfirm title="确认删除?" :hide-after="0" @confirm="deleteData(scope.row.ID)">
+        <el-popconfirm title="Delete confirm?" :hide-after="0" @confirm="deleteData(scope.row.ID)">
           <template #reference>
             <el-button :icon="Delete" circle style="margin-left: 6px"/>
           </template>
@@ -318,7 +318,7 @@ const parseLocation = (location, projectLanguage) => {
       } else {
         snippet += content + "\n"
       }
-    } else { //startLine不等于endLine时
+    } else { //When startLine is not equal to endLine
       if (line === startLine) {
         fragment += content.slice(startColumn - 1) + "\n"
         snippet += content.slice(0, startColumn - 1) + startTag
@@ -331,7 +331,7 @@ const parseLocation = (location, projectLanguage) => {
         snippet += content.slice(0, endColumn - 1) + stopTag
             + content.slice(endColumn - 1) + "\n"
       } else {
-        //line小于startLine或大于endLine
+        //line is less than startLine or greater than endLine
         snippet += content + "\n"
       }
     }
@@ -343,7 +343,7 @@ const parseLocation = (location, projectLanguage) => {
     snippet = hljs.highlight(snippet, {language: projectLanguage}).value
   } else {
     //snippet = hljs.highlightAuto(snippet).value
-    //结果数如果太长，极耗性能，前端卡死了都，还是改成固定语言
+    //If the result number is too long, it will consume a lot of performance and cause the front end to freeze. It is better to change it to a fixed language.
     snippet = hljs.highlight(snippet, {language: "javascript"}).value
   }
 
@@ -466,7 +466,7 @@ const filterChange = (f) => {
 const deleteData = (ID) => {
   deleteResult(ID).then(response => {
     fetchData();
-    ElMessage.success("删除成功")
+    ElMessage.success("successfully deleted")
     emit("refresh")
   })
 }

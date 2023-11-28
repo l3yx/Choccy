@@ -4,13 +4,13 @@
               @sort-change="sortChange"
               table-layout="auto"
               v-loading="loading">
-      <el-table-column fixed="left" prop="Url" label="项目" sortable="custom">
+      <el-table-column fixed="left" prop="Url" label="project" sortable="custom">
         <template #default="scope">
           <el-link type="primary" :href="scope.row.Url" target="_blank">{{ scope.row.Url.slice(19) }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column prop="Language" label="语言" sortable="custom" />
-      <el-table-column prop="Suite" label="查询套件" width="100px">
+      <el-table-column prop="Language" label="language" sortable="custom" />
+      <el-table-column prop="Suite" label="query suite" width="100px">
         <template #default="scope">
           <el-tag v-for="(item, index) in scope.row.Suite"
                   :key="index"
@@ -20,8 +20,8 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="Mode" :formatter="modeFormatter" label="扫描模式" sortable="custom"/>
-      <el-table-column label="暂停" prop="Pause" sortable="custom">
+      <el-table-column prop="Mode" :formatter="modeFormatter" label="Scan mode" sortable="custom"/>
+      <el-table-column label="pause" prop="Pause" sortable="custom">
         <template #default="scope">
           <el-icon v-if="scope.row.Pause" :size="20" style="margin-top: 8px">
             <VideoPause/>
@@ -31,7 +31,7 @@
           </el-icon>
         </template>
       </el-table-column>
-      <el-table-column prop="LatestVersion" label="最新版本">
+      <el-table-column prop="LatestVersion" label="The latest version">
         <template #default="scope">
           <el-tooltip
               effect="dark"
@@ -45,10 +45,10 @@
         </template>
       </el-table-column>
       <el-table-column prop="LatestVersionUpdateTime" :formatter="(row, col, value, index)=>timeFormatter(value)"
-                       label="更新时间" sortable="custom"/>
+                       label="Update time" sortable="custom"/>
       <el-table-column prop="LastAnalyzeTime" :formatter="(row, col, value, index)=>timeFormatter(value)"
-                       label="最近扫描时间" sortable="custom"/>
-      <el-table-column label="最近扫描版本">
+                       label="Last scan time" sortable="custom"/>
+      <el-table-column label="Recently scanned version">
         <template #default="scope">
           <span v-if="scope.row.Mode == 0">{{ releaseVersionFormatter(scope.row.LastAnalyzeReleaseTag) }}</span>
           <span v-if="scope.row.Mode == 1">{{ commitVersionFormatter(scope.row.LastAnalyzeDatabaseCommit) }}</span>
@@ -61,13 +61,13 @@
         </template>
         <template #default="scope">
           <el-tooltip
-              content="加入扫描队列"
+              content="Join scan queue"
               placement="left-start"
           >
             <el-button :icon="Aim" circle @click="runTask(scope.row.ID)"/>
           </el-tooltip>
           <el-button :icon="Edit" circle @click="updateData(scope.row)" style="margin-left: 6px"/>
-          <el-popconfirm title="确认删除?" :hide-after="0" @confirm="deleteData(scope.row.ID)">
+          <el-popconfirm title="Delete confirm?" :hide-after="0" @confirm="deleteData(scope.row.ID)">
             <template #reference>
               <el-button :icon="Delete" circle style="margin-left: 6px"/>
             </template>
@@ -87,12 +87,12 @@
         @current-change="fetchData"
     />
 
-    <el-dialog v-model="dialogFormVisible" :title="form.ID==0?'新增项目':'编辑项目'">
+    <el-dialog v-model="dialogFormVisible" :title="form.ID==0?'Add new item':'Edit item'">
       <el-form :model="form">
-        <el-form-item label="项目地址">
+        <el-form-item label="project address">
           <el-input v-model="form.Url" autocomplete="off" placeholder="https://github.com/owner/repo"/>
         </el-form-item>
-        <el-form-item label="项目语言">
+        <el-form-item label="Project language">
           <el-select v-model="form.Language" filterable allow-create placeholder="Select" style="width:100%">
             <el-option
                 v-for="item in ['java','go','python']"
@@ -100,7 +100,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="查询套件">
+        <el-form-item label="query suite">
           <el-select v-model="form.Suite" multiple
                      filterable
                      clearable
@@ -113,19 +113,19 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="扫描模式">
+        <el-form-item label="Scan mode">
           <el-select v-model="form.Mode" class="m-2" placeholder="Select" style="width:100%">
             <el-option
-                v-for="item in [{'label':'Release',value:0},{'label':'原有数据库',value:1}]"
+                v-for="item in [{'label':'Release',value:0},{'label':'Original database',value:1}]"
                 :label="item.label"
                 :value="item.value"
             />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="form.Mode!=1" label="编译命令">
-          <el-input v-model="form.Command" autocomplete="off" placeholder="一般可留空，CodeQL会自动识别"/>
+        <el-form-item v-if="form.Mode!=1" label="Compilation command">
+          <el-input v-model="form.Command" autocomplete="off" placeholder="Generally, it can be left blank and CodeQL will automatically recognize it."/>
         </el-form-item>
-        <el-form-item label="暂停监控">
+        <el-form-item label="Pause monitoring">
           <el-switch v-model="form.Pause" style="--el-switch-on-color: #ff4949;"/>
         </el-form-item>
       </el-form>
@@ -186,7 +186,7 @@ const modeFormatter = (row, col, value, index) => {
   if (value === 0) {
     return "Release";
   } else if (value === 1) {
-    return "原有数据库";
+    return "Original database";
   }
   return value;
 }
@@ -234,14 +234,14 @@ const saveData = () => {
   saveProject(form).then(response => {
     fetchData();
     dialogFormVisible.value = false;
-    ElMessage.success("保存成功")
+    ElMessage.success("Saved successfully")
   })
 }
 
 const deleteData = (ID) => {
   deleteProject(ID).then(response => {
     fetchData();
-    ElMessage.success("删除成功")
+    ElMessage.success("successfully deleted")
   })
 }
 
@@ -249,9 +249,9 @@ const runTask = (ID) => {
   runTaskByID(ID).then(response => {
     emit("refresh")
     if (response.data.ok) {
-      ElMessage.success("已添加到任务队列")
+      ElMessage.success("Added to task queue")
     } else {
-      ElMessage.info("任务已在进行或队列中")
+      ElMessage.info("The task is already in progress or queued")
     }
   })
 }

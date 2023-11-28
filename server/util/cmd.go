@@ -27,7 +27,7 @@ func RunCmd(name string, arg ...string) (string, string, error) {
 var envMap map[string]string
 
 func SetEnv(envToSet string) {
-	//储存初始环境变量
+	//Storage Initial Environment Variables
 	if envMap == nil {
 		envMap = make(map[string]string)
 		envs := os.Environ()
@@ -39,7 +39,7 @@ func SetEnv(envToSet string) {
 		}
 	}
 
-	//清空当前环境变量，为重新设置做准备
+	//Empty the current environment variable in preparation for reset
 	{
 		envs := os.Environ()
 		for _, env := range envs {
@@ -53,7 +53,7 @@ func SetEnv(envToSet string) {
 		}
 	}
 
-	//还原系统原有环境变量
+	//restore system original environment variable
 	for key, value := range envMap {
 		err := os.Setenv(key, value)
 		if err != nil {
@@ -61,7 +61,7 @@ func SetEnv(envToSet string) {
 		}
 	}
 
-	//设置新的变量
+	//Setting new variables
 	envToSetList := strings.Split(envToSet, "\n")
 	for _, envLine := range envToSetList {
 		envLine = strings.TrimSpace(envLine)

@@ -11,17 +11,17 @@
             </el-icon>
           </el-menu-item>
           <div class="flex-grow"/>
-          <el-menu-item index="/project">GitHub项目</el-menu-item>
-          <el-menu-item index="/pack">查询包</el-menu-item>
-          <el-menu-item index="/suite">查询套件</el-menu-item>
-          <el-menu-item index="/database">数据库</el-menu-item>
+          <el-menu-item index="/project">GitHub project</el-menu-item>
+          <el-menu-item index="/pack">Query package</el-menu-item>
+          <el-menu-item index="/suite">query suite</el-menu-item>
+          <el-menu-item index="/database">database</el-menu-item>
           <el-menu-item index="/task">
-            <el-badge :value="unread.task" :hidden="unread.task===0" class="item">任务</el-badge>
+            <el-badge :value="unread.task" :hidden="unread.task===0" class="item">Task</el-badge>
           </el-menu-item>
           <el-menu-item index="/result">
-            <el-badge :value="unread.result" :hidden="unread.result===0" class="item">分析结果</el-badge>
+            <el-badge :value="unread.result" :hidden="unread.result===0" class="item">Analyze results</el-badge>
           </el-menu-item>
-          <el-menu-item index="/setting">设置</el-menu-item>
+          <el-menu-item index="/setting">set up</el-menu-item>
         </el-menu>
       </el-header>
       <el-main style="">
@@ -45,7 +45,7 @@ const fetchNotifications = () => {
   getNotifications().then(response => {
     if (response.data.notifications.length>0) {
       ElNotification({
-        title: '提示',
+        title: 'hint',
         position: 'top-left',
         showClose: true,
         dangerouslyUseHTMLString: true,
@@ -70,7 +70,7 @@ const parseNotifications = (notifications) => {
 }
 
 const openAuth = () => {
-  ElMessageBox.prompt('请输入系统Token', '', {
+  ElMessageBox.prompt('Please enter system Token', '', {
     confirmButtonText: 'OK',
     showClose: false,
     showCancelButton: false,

@@ -115,7 +115,7 @@ func DeleteSuite(c *gin.Context) {
 		panic(err.Error())
 	}
 	if filepath.Dir(suiteFilePath) != settingPath.CodeQLSuite {
-		panic("文件名错误")
+		panic("File name error")
 	}
 
 	err = os.Remove(suiteFilePath)
@@ -144,12 +144,12 @@ func CreateSuite(c *gin.Context) {
 		panic(err.Error())
 	}
 	if filepath.Dir(suiteFilePath) != settingPath.CodeQLSuite {
-		panic("文件名错误")
+		panic("File name error")
 	}
 
 	_, err = os.Stat(suiteFilePath)
 	if err == nil {
-		panic("文件已经存在")
+		panic("File already exists")
 	}
 
 	file, err := os.Create(suiteFilePath)
@@ -185,7 +185,7 @@ func RenameSuite(c *gin.Context) {
 		panic(err.Error())
 	}
 	if filepath.Dir(oldSuiteFilePath) != settingPath.CodeQLSuite {
-		panic("文件名错误")
+		panic("File name error")
 	}
 
 	newSuiteFilePath, err := filepath.Abs(filepath.Join(settingPath.CodeQLSuite, newSuiteName))
@@ -193,12 +193,12 @@ func RenameSuite(c *gin.Context) {
 		panic(err.Error())
 	}
 	if filepath.Dir(newSuiteFilePath) != settingPath.CodeQLSuite {
-		panic("文件名错误")
+		panic("File name error")
 	}
 
 	_, err = os.Stat(newSuiteFilePath)
 	if err == nil {
-		panic("文件已经存在")
+		panic("File already exists")
 	}
 
 	err = os.Rename(oldSuiteFilePath, newSuiteFilePath)

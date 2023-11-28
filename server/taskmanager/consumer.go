@@ -21,32 +21,32 @@ func Consumer() {
 				return
 			}
 
-			//异常处理
+			//Exception handling
 			defer func(task *model.Task) {
 				if r := recover(); r != nil {
 					processor.WriteTaskLog(task, fmt.Sprintf("%s", r))
-					processor.SetTaskStatus(task, -1) //任务错误
+					processor.SetTaskStatus(task, -1) //task error
 				}
 			}(&task)
 
 			resultCount := 0
 
-			processor.SetTaskStatus(&task, 1) //任务进行中
+			processor.SetTaskStatus(&task, 1) //Mission in progress
 
 			var project model.Project
 			result = database.DB.First(&project, task.ProjectID)
 			if result.Error != nil {
-				panic(fmt.Sprintf("获取项目 %d 失败", task.ProjectID))
+				panic(fmt.Sprintf("Get item %d failed", task.ProjectID))
 			}
 
 			var modelStr string
 			if task.ProjectMode == 0 {
 				modelStr = "Release"
 			} else {
-				modelStr = "原有数据库"
+				modelStr = "original database"
 			}
 			processor.WriteTaskLog(&task,
-				fmt.Sprintf("开始任务，项目：%s/%s，语言：%s， 模式：%s，查询套件：%s",
+				fmt.Sprintf("Start Task, Item:%s/%s, Language:%s, Mode:%s, Query Suite:%s",
 					task.ProjectOwner, task.ProjectRepo,
 					task.ProjectLanguage,
 					modelStr,
@@ -55,20 +55,20 @@ func Consumer() {
 			)
 
 			if task.ProjectMode == 0 { //Release
-				// 新版判断
-				processor.SetTaskStage(&task, 0) //新版本判断
+				// new edition judgment
+				processor.SetTaskStage(&task, 0) // New version judgment
 				tags, latestRelease := processor.CheckReleaseUpdates(&task, project.LastAnalyzeReleaseTag, &project)
 				if len(tags) == 0 {
 					if !task.Manual {
-						processor.WriteTaskLog(&task, "当前没有新版本，结束任务")
-						processor.SetTaskStatus(&task, 2) //任务完成
+						processor.WriteTaskLog(&task, "There is no new version, end the task")
+						processor.SetTaskStatus(&task, 2) //Task completed
 						return
 					} else {
-						processor.WriteTaskLog(&task, "当前没有新版本，但该任务手动触发，默认扫描当前最新版："+latestRelease.TagName)
+						processor.WriteTaskLog(&task, "There is currently no new version, but the task is triggered manually, and the current latest version is scanned by default:"+latestRelease.TagName)
 						tags = []string{latestRelease.TagName}
 					}
 				} else {
-					processor.WriteTaskLog(&task, "获取到新版本："+strings.Join(tags, "，"))
+					processor.WriteTaskLog(&task, "Get a new version:"+strings.Join(tags, ", "))
 				}
 
 				processor.SetTaskVersions(&task, tags)
@@ -81,54 +81,54 @@ func Consumer() {
 						tag)
 					githubTag, err := util.GetGithubTag(project.Owner, project.Repo, tag)
 					if err != nil {
-						panic("获取tag对应的commit失败：" + err.Error())
+						panic("Failed to get commit corresponding to tag:" + err.Error())
 					}
 					processor.CheckAndRemoveUnValidDatabase(&task, databaseName)
 					databasePath := util.IsCodeQLDatabaseExists(databaseName)
 					if databasePath == "" {
-						//下载新版本
-						processor.SetTaskStage(&task, 1) // 下载新版本
+						//Download new version
+						processor.SetTaskStage(&task, 1) // Download new version
 						tagSourcePath := processor.DownloadRelease(&task, tag)
 						defer func() {
-							processor.WriteTaskLog(&task, "清理代码："+tagSourcePath)
+							processor.WriteTaskLog(&task, "Cleanup code:"+tagSourcePath)
 							os.RemoveAll(tagSourcePath)
 						}()
 
-						//编译数据库
-						processor.SetTaskStage(&task, 2) // 编译数据库
+						//Compile database
+						processor.SetTaskStage(&task, 2) // Compile database
 						databasePath = processor.CreateDatabase(&task, tagSourcePath, databaseName)
 					} else {
-						processor.WriteTaskLog(&task, fmt.Sprintf("数据库 %s 有效，跳过源码下载和数据库构建", databaseName))
+						processor.WriteTaskLog(&task, fmt.Sprintf("Database %s valid, skip source code download and database build", databaseName))
 					}
 
-					//扫描
+					//Scanning
 					processor.SetTaskStage(&task, 3)
 					resultFileName, resultFilePath := processor.Analyze(&task, databasePath, tag)
 					codeQLSarif, err := util.ParseSarifFile(resultFilePath)
 					if err != nil {
-						panic("分析结果解析错误：" + err.Error())
+						panic("Analysis result parsing error:" + err.Error())
 					}
 					resultCount += len(codeQLSarif.Results)
 					processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
-					processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
+					processor.WriteTaskLog(&task, fmt.Sprintf("Number of scan results: %d", len(codeQLSarif.Results)))
 					processor.AddTaskAnalyzedVersion(&task, tag)
 					processor.SetProjectLastAnalyzeReleaseTag(&project, tag)
 					processor.CreateTaskResult(tag, githubTag.Commit.Sha, resultFileName, len(codeQLSarif.Results), task.ID)
 				}
-			} else if task.ProjectMode == 1 { //原有数据库
-				// 新版判断
-				processor.SetTaskStage(&task, 0) //新版本判断
+			} else if task.ProjectMode == 1 { //original database
+				// new edition judgment
+				processor.SetTaskStage(&task, 0) //new edition judgment
 				databaseCommit, databaseUrl := processor.CheckDatabaseUpdates(&task, &project)
 				if databaseCommit == project.LastAnalyzeDatabaseCommit {
 					if !task.Manual {
-						processor.WriteTaskLog(&task, "当前没有新版本，结束任务")
-						processor.SetTaskStatus(&task, 2) //任务完成
+						processor.WriteTaskLog(&task, "There is no new version, end the task")
+						processor.SetTaskStatus(&task, 2) //Mission accomplished
 						return
 					} else {
-						processor.WriteTaskLog(&task, "当前没有新版本，但该任务手动触发，默认扫描当前最新版："+databaseCommit)
+						processor.WriteTaskLog(&task, "There is currently no new version, but the task is triggered manually, defaulting to the current latest version of Scanning:"+databaseCommit)
 					}
 				} else {
-					processor.WriteTaskLog(&task, "获取到新版本："+databaseCommit)
+					processor.WriteTaskLog(&task, "Get a new version:"+databaseCommit)
 				}
 				processor.SetTaskVersions(&task, []string{databaseCommit})
 				databaseCommitAbbr := databaseCommit
@@ -143,29 +143,29 @@ func Consumer() {
 				processor.CheckAndRemoveUnValidDatabase(&task, databaseName)
 				databasePath := util.IsCodeQLDatabaseExists(databaseName)
 				if databasePath == "" {
-					// 下载新版本
-					processor.SetTaskStage(&task, 1) // 下载新版本
+					// Download new version
+					processor.SetTaskStage(&task, 1) // Download new version
 					databasePath = processor.DownloadDatabase(&task, databaseUrl, databaseCommit, databaseName)
 				} else {
-					processor.WriteTaskLog(&task, fmt.Sprintf("数据库 %s 有效，跳过数据库下载", databaseName))
+					processor.WriteTaskLog(&task, fmt.Sprintf("database %s valid, skip database download", databaseName))
 				}
 
-				// 扫描
-				processor.SetTaskStage(&task, 3) // 扫描
+				// Scanning
+				processor.SetTaskStage(&task, 3) // Scanning
 				resultFileName, resultFilePath := processor.Analyze(&task, databasePath, databaseCommitAbbr)
 				codeQLSarif, err := util.ParseSarifFile(resultFilePath)
 				if err != nil {
-					panic("分析结果解析错误：" + err.Error())
+					panic("Analysis result parsing error:" + err.Error())
 				}
 				resultCount += len(codeQLSarif.Results)
 				processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
-				processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
+				processor.WriteTaskLog(&task, fmt.Sprintf("Number of Scanning Results: %d", len(codeQLSarif.Results)))
 				processor.AddTaskAnalyzedVersion(&task, databaseCommit)
 				processor.SetProjectLastAnalyzeDatabaseCommit(&project, databaseCommit)
 				processor.CreateTaskResult(databaseCommit, databaseCommit, resultFileName, len(codeQLSarif.Results), task.ID)
 			}
 
-			processor.SetTaskStatus(&task, 2) //任务完成
+			processor.SetTaskStatus(&task, 2) //Mission accomplished
 		}()
 	}
 }

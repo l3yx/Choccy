@@ -25,18 +25,18 @@ type CodeQLRelatedLocation struct {
 	CodeQLLocation
 }
 type CodeQLResult struct {
-	Rule             string                  //规则id
-	Message          string                  //提示信息
-	RelatedLocations []CodeQLRelatedLocation //信息中的超链接指向的位置，没有的话为nil
-	Location         CodeQLLocation          //漏洞所在位置
-	CodeFlows        []CodeQLCodeFlow        //代码路径，一个path-problem类型的漏洞可能有多条路径（终点一样），problem类型该字段为nil
+	Rule             string                  //rule id
+	Message          string                  //Newsletter
+	RelatedLocations []CodeQLRelatedLocation //The hyperlink in the message points to the location, if not, nil
+	Location         CodeQLLocation          //Location of vulnerability
+	CodeFlows        []CodeQLCodeFlow        //Code path, a path-problem type vulnerability may have multiple paths (the same endpoint), the problem type field is nil
 }
 type CodeQLSarif struct {
 	SemanticVersion string
-	NotificationsId []string       //不知道干啥的，但是可以用来大致判断语言
-	Rules           []string       //所用全部规则id
-	Packs           []string       //所用全部pack名称
-	Results         []CodeQLResult //扫描结果，长度就是漏洞数量
+	NotificationsId []string       //I don't know what to do, but it can be used to judge language roughly
+	Rules           []string       //All rules used id
+	Packs           []string       //All package names used
+	Results         []CodeQLResult //Scan results, length is the number of vulnerabilities
 }
 
 func ParseSarifFile(path string) (*CodeQLSarif, error) {
@@ -47,26 +47,26 @@ func ParseSarifFile(path string) (*CodeQLSarif, error) {
 	content := string(bytes)
 
 	codeQLSarif := CodeQLSarif{}
-	//CodeQL版本
+	//CodeQL edition
 	codeQLSarif.SemanticVersion = gjson.Get(content, "runs.0.tool.driver.semanticVersion").String()
 	//NotificationsId
 	gjson.Get(content, "runs.0.tool.driver.notifications.#.id").ForEach(func(key, value gjson.Result) bool {
 		codeQLSarif.NotificationsId = append(codeQLSarif.NotificationsId, value.String())
 		return true
 	})
-	//扫描所用的全部规则，里面包含了ql规则的所有属性，但暂只取id
+	//All the rules used for scanning, which contains all the attributes of the ql rule, but only takes the id for now
 	gjson.Get(content, "runs.0.tool.driver.rules.#.id").ForEach(func(key, value gjson.Result) bool {
 		codeQLSarif.Rules = append(codeQLSarif.Rules, value.String())
 		return true
 	})
-	//扫描所用的全部pack，里面包含了名称版本等，但暂只取name
+	//Scan all packs used, which include name, version, etc., but only name is taken for now.
 	gjson.Get(content, "runs.0.tool.extensions.#.name").ForEach(func(key, value gjson.Result) bool {
 		codeQLSarif.Packs = append(codeQLSarif.Packs, value.String())
 		return true
 	})
 
 	codeQLSarif.Results = make([]CodeQLResult, 0)
-	//扫描结果,长度就是漏洞数量
+	//The length of the scan results is the number of vulnerabilities.
 	results := gjson.Get(content, "runs.0.results").Array()
 	for _, result := range results {
 		codeQLResult := CodeQLResult{}
@@ -90,24 +90,24 @@ func ParseSarifFile(path string) (*CodeQLSarif, error) {
 			return true
 		})
 
-		// locations是个数组，但貌似长度都是1
+		// locations is an array, but it seems that the length is all 1
 		resultCodeQLLocation := CodeQLLocation{}
 		resultCodeQLLocation.Uri = result.Get("locations.0.physicalLocation.artifactLocation.uri").String()
 		resultCodeQLLocation.StartLine = result.Get("locations.0.physicalLocation.region.startLine").Int()
 		resultCodeQLLocation.StartColumn = result.Get("locations.0.physicalLocation.region.startColumn").Int()
 		resultCodeQLLocation.EndLine = result.Get("locations.0.physicalLocation.region.endLine").Int()
 		resultCodeQLLocation.EndColumn = result.Get("locations.0.physicalLocation.region.endColumn").Int()
-		//上下文代码及位置
+		//Context code and location
 		resultCodeQLLocation.ContextStartLine = result.Get("locations.0.physicalLocation.contextRegion.startLine").Int()
 		resultCodeQLLocation.ContextEndLine = result.Get("locations.0.physicalLocation.contextRegion.endLine").Int()
 		resultCodeQLLocation.ContextSnippet = result.Get("locations.0.physicalLocation.contextRegion.snippet.text").String()
 		codeQLResult.Location = resultCodeQLLocation
 
-		//一个漏洞所有的路径（终点都一样），没有路径的话就是problem
+		//All paths of a vulnerability (the end points are the same). If there is no path, it is a problem.
 		codeFlows := result.Get("codeFlows").Array()
 		for _, codeFlow := range codeFlows {
 			codeQLCodeFlow := CodeQLCodeFlow{}
-			//单条路径的位置序列
+			//Position sequence of a single path
 			threadFlowLocations := codeFlow.Get("threadFlows.0.locations").Array()
 			for _, threadFlowLocation := range threadFlowLocations {
 				codeFlowLocation := CodeQLLocation{}
