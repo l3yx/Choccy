@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// CheckReleaseUpdates 返回新版本列表，理论上数组顺序是从旧到新
+// CheckReleaseUpdates Returns a list of new versions, theoretically the array order is old to new
 func CheckReleaseUpdates(task *model.Task, lastAnalyzeReleaseTag string, project *model.Project) ([]string, *util.GithubRelease) {
 	var setting model.Setting
 	result := database.DB.Take(&setting)

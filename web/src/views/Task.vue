@@ -17,9 +17,9 @@
         />
       </template>
     </el-table-column>
-    <el-table-column prop="ProjectName" label="Item name" sortable="custom"/>
-    <el-table-column prop="ProjectLanguage" label="language" sortable="custom"/>
-    <el-table-column prop="ProjectMode" :formatter="modeFormatter" label="Scan object" sortable="custom"/>
+    <el-table-column prop="Project Name" label="Item name" sortable="custom"/>
+    <el-table-column prop="Project Language" label="language" sortable="custom"/>
+    <el-table-column prop="Project Mode" :formatter="modeFormatter" label="Scan object" sortable="custom"/>
     <el-table-column prop="Versions" label="Scanned version" width="100px">
       <template #default="scope">
         <el-tag v-for="(item, index) in scope.row.Versions"
@@ -30,7 +30,7 @@
         </el-tag>
       </template>
     </el-table-column>
-    <el-table-column prop="ProjectSuite" label="query suite" width="100px">
+    <el-table-column prop="Project Suite" label="query suite" width="100px">
       <template #default="scope">
         <el-tag v-for="(item, index) in scope.row.ProjectSuite"
                 :key="index"

@@ -95,7 +95,7 @@
         <el-form-item label="Project language">
           <el-select v-model="form.Language" filterable allow-create placeholder="Select" style="width:100%">
             <el-option
-                v-for="item in ['java','go','python']"
+                v-for="item in ['java','go','python', 'cpp']"
                 :value="item"
             />
           </el-select>

@@ -26,7 +26,7 @@
                     <span>Cli</span>
                   </el-tooltip>
                 </template>
-                <el-input v-model="setting.CodeQLCli" @change="(value) => settingOnchange('CodeQLCli',value)">
+                <el-input v-model="setting.CodeQLCli" @change="(value) => settingOnchange('CodeQL Cli',value)">
                   <template #append>
                     <span>{{ state.CodeQLCli_ver }}</span>
                   </template>
@@ -451,7 +451,7 @@ const settingOnchange = (key, value) => {
 
 const getSettingTest = (key, value) => {
   return testSetting(key, value).then(response => {
-    if (key == "CodeQLCli") {
+    if (key == "CodeQL Cli") {
       state.CodeQLCli_ver = response.data
     } else if (key == "EnvStr") {
       state.Env = response.data
@@ -475,7 +475,7 @@ const fetchData = () => {
 
 onMounted(() => {
   fetchData().then(_ => {
-    getSettingTest("CodeQLCli", setting.value.CodeQLCli);
+    getSettingTest("CodeQL Cli", setting.value.CodeQLCli);
     getSettingTest("EnvStr", setting.value.EnvStr)
   })
 })
