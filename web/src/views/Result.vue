@@ -15,11 +15,14 @@
               :data="props.row.CodeQLSarif.Results"
               :show-header="false"
               table-layout="auto"
-              :row-class-name="rowClassName">
+              :row-class-name="rowClassName"
+              @expand-change="(row, expandedRows) => resultExpandChange(row, expandedRows, props.row.FileName)"
+              row-key="ID">
             <el-table-column width="20px"/>
             <el-table-column type="expand">
               <template #default="scope">
-                <el-table
+                <div style="" v-loading="scope.row.loading">
+                  <el-table
                     :data="scope.row.CodeFlows"
                     :show-header="false"
                     table-layout="auto"
@@ -70,10 +73,11 @@
                   </el-table-column>
                   <el-table-column>
                     <template #default="scope_s">
-                      {{ scope_s.row.Location.length }}
+                      {{ scope_s.row.Location?scope_s.row.Location.length:0 }}
                     </template>
                   </el-table-column>
                 </el-table>
+                </div>
               </template>
             </el-table-column>
             <el-table-column>
@@ -246,7 +250,7 @@
 
 <script setup>
 import {onMounted, reactive, ref} from "vue";
-import {deleteResult, getResults, setIsRead, getResultSarif} from "../api/result";
+import {deleteResult, getResults, setIsRead, getResultSarif, getResultSarifCodeFlows} from "../api/result";
 import {timeFormatter} from "../utils/formatter";
 import hljs from 'highlight.js'
 import 'highlight.js/styles/default.min.css'
@@ -259,11 +263,26 @@ const expandChange = (row, expandedRows) =>{
   if(expandedRows.indexOf(row)!==-1 && row.CodeQLSarif.loading){
     getResultSarif(row.FileName).then(response => {
       row.CodeQLSarif = response.data
+      row.CodeQLSarif.Results.forEach(function (item) {
+        item.loading = true
+      });
       row.CodeQLSarif.loading = false
     }).catch(err => {
       row.CodeQLSarif.Results = []
       row.CodeQLSarif.loading = false
     })
+  }
+}
+
+const resultExpandChange = (row, expandedRows, fileName) => {
+  if(expandedRows.indexOf(row)!==-1){
+    getResultSarifCodeFlows(fileName,row.ID).then(response => {
+      row.CodeFlows = response.data
+      row.loading = false
+    }).catch(err => {
+      row.loading = false
+    })
+
   }
 }
 

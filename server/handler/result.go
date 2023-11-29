@@ -79,16 +79,42 @@ func GetResultSarif(c *gin.Context) {
 		panic(err.Error())
 	}
 	resultFilePath := filepath.Join(settingPath.CodeQlResult, fileName)
-	codeQLSarif, err := util.ParseSarifFile(resultFilePath)
+	codeQLSarif, err := util.ParseSarifFile(resultFilePath, false)
 	if err != nil {
-		codeQLSarif = &util.CodeQLSarif{}
-		codeQLSarif.NotificationsId = []string{}
-		codeQLSarif.Rules = []string{}
-		codeQLSarif.Packs = []string{}
-		codeQLSarif.Results = make([]util.CodeQLResult, 0)
+		panic(err.Error())
 	}
 	c.JSON(200, gin.H{
 		"data": codeQLSarif,
+	})
+}
+
+func GetResultSarifCodeFlows(c *gin.Context) {
+	fileName := c.DefaultQuery("fileName", "unknow")
+	ID, err := strconv.Atoi(c.DefaultQuery("id", ""))
+	if err != nil {
+		panic(err.Error())
+	}
+	settingPath, err := util.GetSettingPath()
+	if err != nil {
+		panic(err.Error())
+	}
+	resultFilePath := filepath.Join(settingPath.CodeQlResult, fileName)
+	codeQLSarif, err := util.ParseSarifFile(resultFilePath, true)
+
+	var codeQLCodeFlows []util.CodeQLCodeFlow
+	if err != nil {
+		panic(err.Error())
+	} else {
+		for _, result := range codeQLSarif.Results {
+			if result.ID == ID {
+				codeQLCodeFlows = result.CodeFlows
+				break
+			}
+		}
+	}
+
+	c.JSON(200, gin.H{
+		"data": codeQLCodeFlows,
 	})
 }
 

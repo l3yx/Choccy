@@ -25,6 +25,7 @@ type CodeQLRelatedLocation struct {
 	CodeQLLocation
 }
 type CodeQLResult struct {
+	ID               int                     //用于区分Result
 	Rule             string                  //规则id
 	Message          string                  //提示信息
 	RelatedLocations []CodeQLRelatedLocation //信息中的超链接指向的位置，没有的话为nil
@@ -39,7 +40,7 @@ type CodeQLSarif struct {
 	Results         []CodeQLResult //扫描结果，长度就是漏洞数量
 }
 
-func ParseSarifFile(path string) (*CodeQLSarif, error) {
+func ParseSarifFile(path string, parseCodeFlow bool) (*CodeQLSarif, error) {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -68,6 +69,7 @@ func ParseSarifFile(path string) (*CodeQLSarif, error) {
 	codeQLSarif.Results = make([]CodeQLResult, 0)
 	//扫描结果,长度就是漏洞数量
 	results := gjson.Get(content, "runs.0.results").Array()
+	resultId := 1
 	for _, result := range results {
 		codeQLResult := CodeQLResult{}
 
@@ -105,26 +107,33 @@ func ParseSarifFile(path string) (*CodeQLSarif, error) {
 
 		//一个漏洞所有的路径（终点都一样），没有路径的话就是problem
 		codeFlows := result.Get("codeFlows").Array()
-		for _, codeFlow := range codeFlows {
-			codeQLCodeFlow := CodeQLCodeFlow{}
-			//单条路径的位置序列
-			threadFlowLocations := codeFlow.Get("threadFlows.0.locations").Array()
-			for _, threadFlowLocation := range threadFlowLocations {
-				codeFlowLocation := CodeQLLocation{}
-
-				codeFlowLocation.Uri = threadFlowLocation.Get("location.physicalLocation.artifactLocation.uri").String()
-				codeFlowLocation.StartLine = threadFlowLocation.Get("location.physicalLocation.region.startLine").Int()
-				codeFlowLocation.StartColumn = threadFlowLocation.Get("location.physicalLocation.region.startColumn").Int()
-				codeFlowLocation.EndLine = threadFlowLocation.Get("location.physicalLocation.region.endLine").Int()
-				codeFlowLocation.EndColumn = threadFlowLocation.Get("location.physicalLocation.region.endColumn").Int()
-				codeFlowLocation.ContextStartLine = threadFlowLocation.Get("location.physicalLocation.contextRegion.startLine").Int()
-				codeFlowLocation.ContextEndLine = threadFlowLocation.Get("location.physicalLocation.contextRegion.endLine").Int()
-				codeFlowLocation.ContextSnippet = threadFlowLocation.Get("location.physicalLocation.contextRegion.snippet.text").String()
-				codeFlowLocation.Message = threadFlowLocation.Get("location.message.text").String()
-				codeQLCodeFlow.Location = append(codeQLCodeFlow.Location, codeFlowLocation)
+		if parseCodeFlow {
+			for _, codeFlow := range codeFlows {
+				codeQLCodeFlow := CodeQLCodeFlow{}
+				//单条路径的位置序列
+				threadFlowLocations := codeFlow.Get("threadFlows.0.locations").Array()
+				for _, threadFlowLocation := range threadFlowLocations {
+					codeFlowLocation := CodeQLLocation{}
+					codeFlowLocation.Uri = threadFlowLocation.Get("location.physicalLocation.artifactLocation.uri").String()
+					codeFlowLocation.StartLine = threadFlowLocation.Get("location.physicalLocation.region.startLine").Int()
+					codeFlowLocation.StartColumn = threadFlowLocation.Get("location.physicalLocation.region.startColumn").Int()
+					codeFlowLocation.EndLine = threadFlowLocation.Get("location.physicalLocation.region.endLine").Int()
+					codeFlowLocation.EndColumn = threadFlowLocation.Get("location.physicalLocation.region.endColumn").Int()
+					codeFlowLocation.ContextStartLine = threadFlowLocation.Get("location.physicalLocation.contextRegion.startLine").Int()
+					codeFlowLocation.ContextEndLine = threadFlowLocation.Get("location.physicalLocation.contextRegion.endLine").Int()
+					codeFlowLocation.ContextSnippet = threadFlowLocation.Get("location.physicalLocation.contextRegion.snippet.text").String()
+					codeFlowLocation.Message = threadFlowLocation.Get("location.message.text").String()
+					codeQLCodeFlow.Location = append(codeQLCodeFlow.Location, codeFlowLocation)
+				}
+				codeQLResult.CodeFlows = append(codeQLResult.CodeFlows, codeQLCodeFlow)
 			}
-			codeQLResult.CodeFlows = append(codeQLResult.CodeFlows, codeQLCodeFlow)
+		} else {
+			if len(codeFlows) > 0 {
+				codeQLResult.CodeFlows = make([]CodeQLCodeFlow, len(codeFlows))
+			}
 		}
+		codeQLResult.ID = resultId
+		resultId++
 		codeQLSarif.Results = append(codeQLSarif.Results, codeQLResult)
 	}
 

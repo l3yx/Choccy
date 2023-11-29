@@ -104,7 +104,7 @@ func Consumer() {
 					//扫描
 					processor.SetTaskStage(&task, 3)
 					resultFileName, resultFilePath := processor.Analyze(&task, databasePath, tag)
-					codeQLSarif, err := util.ParseSarifFile(resultFilePath)
+					codeQLSarif, err := util.ParseSarifFile(resultFilePath, false)
 					if err != nil {
 						panic("分析结果解析错误：" + err.Error())
 					}
@@ -153,7 +153,7 @@ func Consumer() {
 				// 扫描
 				processor.SetTaskStage(&task, 3) // 扫描
 				resultFileName, resultFilePath := processor.Analyze(&task, databasePath, databaseCommitAbbr)
-				codeQLSarif, err := util.ParseSarifFile(resultFilePath)
+				codeQLSarif, err := util.ParseSarifFile(resultFilePath, false)
 				if err != nil {
 					panic("分析结果解析错误：" + err.Error())
 				}

@@ -20,6 +20,15 @@ export function getResultSarif(fileName) {
     })
 }
 
+export function getResultSarifCodeFlows(fileName, id) {
+    return request.get('/result/sarif/flows', {
+        params: {
+            fileName,
+            id
+        }
+    })
+}
+
 export function deleteResult(ID) {
     return request.delete('/result', {
         params: {

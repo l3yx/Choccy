@@ -32,6 +32,7 @@ func SetupApiRoutes(r *gin.Engine) {
 
 		apiRouter.GET("/result", handler.GetResult)
 		apiRouter.GET("/result/sarif", handler.GetResultSarif)
+		apiRouter.GET("/result/sarif/flows", handler.GetResultSarifCodeFlows)
 		apiRouter.GET("/result/unread", handler.GetResultUnread)
 		apiRouter.DELETE("/result", handler.DeleteResult)
 		apiRouter.POST("/result/read", handler.SetResultIsRead)
