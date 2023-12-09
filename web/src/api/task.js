@@ -28,6 +28,14 @@ export function setIsRead(idList, read) {
     })
 }
 
+export function addTask(database, suites, name) {
+    return request.post('/task',{
+        database: database,
+        suites: suites,
+        name: name
+    })
+}
+
 export function getTaskUnread() {
     return request.get('/task/unread')
 }

@@ -4,9 +4,13 @@ import (
 	"choccy/server/database"
 	"choccy/server/database/model"
 	"choccy/server/taskmanager"
+	"choccy/server/util"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"path"
 	"strconv"
+	"strings"
 )
 
 func RunTask(c *gin.Context) {
@@ -132,5 +136,44 @@ func GetTaskUnread(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"count": count,
+	})
+}
+
+func AddTask(c *gin.Context) {
+	type Task struct {
+		Database string   `json:"database"`
+		Suites   []string `json:"suites"`
+		Name     string   `json:"name"`
+	}
+	var task Task
+	err := c.ShouldBind(&task)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if strings.TrimSpace(task.Database) == "" {
+		panic(fmt.Sprintf("请选择数据库"))
+	}
+	if len(task.Suites) == 0 {
+		panic(fmt.Sprintf("请选择查询套件"))
+	}
+	if strings.TrimSpace(task.Name) == "" {
+		task.Name = task.Database
+	}
+
+	settingPath, err := util.GetSettingPath()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	success, err := taskmanager.AddCustomTask(path.Join(settingPath.CodeQLDatabase, task.Database), task.Suites, task.Name)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, gin.H{
+		"data": gin.H{
+			"success": success,
+		},
 	})
 }

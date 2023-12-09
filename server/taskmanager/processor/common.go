@@ -85,7 +85,9 @@ func SetTaskStatus(task *model.Task, stats int) {
 		}
 		if setting.AutoReadEmptyTask {
 			if len(task.AnalyzedVersions) == 0 {
-				task.IsRead = true
+				if task.TotalResultsCount == 0 {
+					task.IsRead = true
+				}
 			}
 		}
 	}
@@ -199,7 +201,13 @@ func Analyze(task *model.Task, databasePath, version string) (string, string) {
 	}()
 	WriteTaskLog(task, "开始分析")
 
-	resultFileName := fmt.Sprintf("%s__%s__%s__%s__%d.sarif", task.ProjectOwner, task.ProjectRepo, task.ProjectLanguage, version, time.Now().Unix())
+	var resultFileName string
+	if strings.TrimSpace(task.ProjectOwner) != "" && strings.TrimSpace(task.ProjectRepo) != "" {
+		resultFileName = fmt.Sprintf("%s__%s__%s__%s__%d.sarif", task.ProjectOwner, task.ProjectRepo, task.ProjectLanguage, version, time.Now().Unix())
+	} else {
+		resultFileName = fmt.Sprintf("%s__%d.sarif", util.MakeValidFilename(task.ProjectName), time.Now().Unix())
+	}
+
 	_, stderr, err, outputPath := util.DatabaseAnalyze(
 		databasePath,
 		tmpSuitePath,

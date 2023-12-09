@@ -39,6 +39,7 @@ func SetupApiRoutes(r *gin.Engine) {
 
 		apiRouter.GET("/task/run", handler.RunTask)
 		apiRouter.GET("/task", handler.GetTasks)
+		apiRouter.POST("/task", handler.AddTask)
 		apiRouter.GET("/task/unread", handler.GetTaskUnread)
 		apiRouter.POST("/task/read", handler.SetTaskIsRead)
 

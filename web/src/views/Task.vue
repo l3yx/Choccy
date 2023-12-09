@@ -63,7 +63,7 @@
            <Search />
           </el-tooltip>
         </el-icon>
-        <span style="margin-left:10px;vertical-align:super;">{{scope.row.AnalyzedVersions.length}}/{{scope.row.Versions.length}}</span>
+        <span v-if="scope.row.Versions.length>1" style="margin-left:10px;vertical-align:super;">{{scope.row.AnalyzedVersions.length}}/{{scope.row.Versions.length}}</span>
       </template>
     </el-table-column>
 
@@ -142,14 +142,22 @@
         </el-icon>
       </template>
     </el-table-column>
-    <el-table-column fixed="right" label="" width="50px">
+    <el-table-column fixed="right" label="" width="106px">
       <template #header>
         <el-tooltip
             content="全部已读"
             placement="left-start"
             :hide-after="10"
         >
-          <el-button style="float: right" :icon="FolderOpened" @click="setTaskIsRead(null,true)" circle/>
+          <el-button style="float: right;margin-left: 6px" :icon="FolderOpened" @click="setTaskIsRead(null,true)"
+                     circle/>
+        </el-tooltip>
+        <el-tooltip
+            content="创建自定义任务"
+            placement="left-start"
+            :hide-after="10"
+        >
+          <el-button style="float: right;" :icon="Plus" @click="showDialogForm" circle/>
         </el-tooltip>
       </template>
       <template #default="scope">
@@ -159,7 +167,7 @@
             placement="left-start"
             :hide-after="10"
         >
-          <el-button :icon="Folder" circle @click="setTaskIsRead(scope.row.ID,false)"/>
+          <el-button style="float: right;" :icon="Folder" circle @click="setTaskIsRead(scope.row.ID,false)"/>
         </el-tooltip>
         <el-tooltip
             v-if="!scope.row.IsRead"
@@ -167,7 +175,7 @@
             placement="left-start"
             :hide-after="10"
         >
-          <el-button :icon="FolderOpened" circle @click="setTaskIsRead(scope.row.ID,true)"/>
+          <el-button style="float: right;" :icon="FolderOpened" circle @click="setTaskIsRead(scope.row.ID,true)"/>
         </el-tooltip>
       </template>
     </el-table-column>
@@ -183,6 +191,45 @@
       @size-change="fetchData"
       @current-change="fetchData"
   />
+
+  <el-dialog v-model="dialogFormVisible" title="新建任务">
+    <el-form :model="form" label-width="68px">
+      <el-form-item label="数据库">
+        <el-select v-model="form.database"
+                   filterable
+                   placeholder="Select" style="width:100%">
+          <el-option
+              v-for="item in databases"
+              :value="item.Name"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="查询套件">
+        <el-select v-model="form.suites" multiple
+                   filterable
+                   clearable
+                   ref="suiteSelect"
+                   @change="suiteSelectChange"
+                   placeholder="Select" style="width:100%">
+          <el-option
+              v-for="item in suites"
+              :value="item.Name"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="项目名称">
+        <el-input v-model="form.name" autocomplete="off" :placeholder="form.database"/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="newTask">
+          Confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <style>
@@ -200,7 +247,7 @@
 
 <script setup>
 import {onMounted, reactive, ref} from "vue";
-import {getTasks,setIsRead} from "../api/task.js";
+import {addTask, getTasks, setIsRead} from "../api/task.js";
 import {timeFormatter} from "../utils/formatter";
 import {
   RemoveFilled,
@@ -210,10 +257,67 @@ import {
   Download,
   Setting,
   Search,Loading,
-  FolderOpened, Folder, Warning, CircleCheck
+  FolderOpened, Folder, Warning, CircleCheck,Plus
 } from '@element-plus/icons-vue'
+import {getSuites} from "../api/suite.js"
+import {getDatabases} from "../api/database";
+import {ElMessage} from "element-plus";
 
 const emit = defineEmits(["refresh"]);
+
+
+const dialogFormVisible = ref(false)
+const form = reactive({
+  database: '',
+  suites: [],
+  name: ''
+})
+const showDialogForm = () => {
+  form.suites = []
+  form.database = ''
+  dialogFormVisible.value = true
+}
+const newTask = () => {
+  addTask(form.database, form.suites,form.name).then(response => {
+    fetchData();
+    dialogFormVisible.value = false;
+
+    if (response.data.success) {
+      ElMessage.success("新建成功")
+    } else {
+      ElMessage.info("任务已在进行或队列中")
+    }
+
+    emit("refresh")
+  })
+}
+const suites = ref()
+const initSuites = () => {
+  getSuites(1, -1, "", "").then(response => {
+    suites.value = response.data
+  })
+}
+const databases = ref()
+const initDatabases = () => {
+  getDatabases(1, -1, "", "").then(response => {
+    databases.value = response.data
+  })
+}
+const suiteSelect = ref(null);
+const suiteSelectTimeout = ref(null);
+const suiteSelectChange = () => {
+  if(form.suites.length>0){
+    if (suiteSelectTimeout.value){
+      clearTimeout(suiteSelectTimeout.value)
+    }
+    suiteSelectTimeout.value = setTimeout(() => {
+      suiteSelect.value.blur()
+    }, 500)
+  }
+}
+
+
+
 const loading = ref(true)
 
 const tableData = ref()
@@ -288,5 +392,7 @@ const setTaskIsRead = (id, read) => {
 
 onMounted(() => {
   fetchData();
+  initSuites()
+  initDatabases()
 })
 </script>

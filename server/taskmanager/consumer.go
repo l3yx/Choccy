@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -34,20 +35,26 @@ func Consumer() {
 			processor.SetTaskStatus(&task, 1) //任务进行中
 
 			var project model.Project
-			result = database.DB.First(&project, task.ProjectID)
-			if result.Error != nil {
-				panic(fmt.Sprintf("获取项目 %d 失败", task.ProjectID))
+			if task.ProjectMode == 0 || task.ProjectMode == 1 {
+				result = database.DB.First(&project, task.ProjectID)
+				if result.Error != nil {
+					panic(fmt.Sprintf("获取项目 %d 失败", task.ProjectID))
+				}
 			}
 
 			var modelStr string
 			if task.ProjectMode == 0 {
 				modelStr = "Release"
-			} else {
+			} else if task.ProjectMode == 1 {
 				modelStr = "原有数据库"
+			} else if task.ProjectMode == 2 {
+				modelStr = "自定义"
+			} else {
+				modelStr = "未知"
 			}
 			processor.WriteTaskLog(&task,
-				fmt.Sprintf("开始任务，项目：%s/%s，语言：%s， 模式：%s，查询套件：%s",
-					task.ProjectOwner, task.ProjectRepo,
+				fmt.Sprintf("开始任务，项目：%s，语言：%s， 模式：%s，查询套件：%s",
+					task.ProjectName,
 					task.ProjectLanguage,
 					modelStr,
 					strings.Join(task.ProjectSuite, " "),
@@ -163,6 +170,19 @@ func Consumer() {
 				processor.AddTaskAnalyzedVersion(&task, databaseCommit)
 				processor.SetProjectLastAnalyzeDatabaseCommit(&project, databaseCommit)
 				processor.CreateTaskResult(databaseCommit, databaseCommit, resultFileName, len(codeQLSarif.Results), task.ID)
+			} else if task.ProjectMode == 2 { //自定义
+				processor.SetTaskStage(&task, 3) // 扫描
+				resultFileName, resultFilePath := processor.Analyze(&task, task.DatabasePath, "null")
+				codeQLSarif, err := util.ParseSarifFile(resultFilePath, false)
+				if err != nil {
+					panic("分析结果解析错误：" + err.Error())
+				}
+				resultCount += len(codeQLSarif.Results)
+				processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
+				processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
+				processor.CreateTaskResult("null", "nul", resultFileName, len(codeQLSarif.Results), task.ID)
+			} else {
+				panic("未知扫描模式：" + strconv.Itoa(task.ProjectMode))
 			}
 
 			processor.SetTaskStatus(&task, 2) //任务完成

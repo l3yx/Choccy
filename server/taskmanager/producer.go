@@ -4,6 +4,10 @@ import (
 	"choccy/server/database"
 	"choccy/server/database/model"
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 func AddTask(project *model.Project, manual bool) (bool, error) {
@@ -46,5 +50,40 @@ func AddTask(project *model.Project, manual bool) (bool, error) {
 
 	CH <- task.ID
 
+	return true, nil
+}
+
+func AddCustomTask(databasePath string, suites []string, name string) (bool, error) {
+	databaseYml := filepath.Join(databasePath, "codeql-database.yml")
+	fileBytes, err := os.ReadFile(databaseYml)
+	if err != nil {
+		return false, err
+	}
+	var language string
+	match := regexp.MustCompile(`primaryLanguage\s*:\s*(.+)`).FindSubmatch(fileBytes)
+	if len(match) == 0 {
+		language = "unknown"
+	} else {
+		language = strings.TrimSpace(string(match[1]))
+	}
+
+	task := model.Task{
+		Manual:           true,
+		ProjectName:      name,
+		ProjectLanguage:  language,
+		ProjectMode:      2,
+		ProjectSuite:     suites,
+		Versions:         []string{},
+		AnalyzedVersions: []string{},
+
+		DatabasePath: databasePath,
+	}
+
+	result := database.DB.Save(&task)
+	if result.Error != nil {
+		return false, result.Error
+	}
+
+	CH <- task.ID
 	return true, nil
 }

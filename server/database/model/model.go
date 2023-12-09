@@ -69,9 +69,11 @@ type Task struct {
 	ProjectRepo     string
 	ProjectName     string
 	ProjectLanguage string
-	ProjectMode     int //0监控release,1监控database
+	ProjectMode     int //0监控release,1监控database,2自定义任务
 	ProjectCommand  string
 	ProjectSuite    StrArr
+
+	DatabasePath string //2需要的属性
 
 	Versions         StrArr
 	AnalyzedVersions StrArr
