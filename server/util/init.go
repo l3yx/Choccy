@@ -64,7 +64,7 @@ https_proxy=${proxy}
 		setting.AutoReadNoResultTask = false
 		setting.AutoReadCompletedTask = false
 		setting.AutoReadNoResultResult = true
-		setting.CodeQLAnalyzeOptions = "--ram 2048"
+		setting.CodeQLAnalyzeOptions = "--ram 10240"
 		database.DB.Create(&setting)
 	}
 }
