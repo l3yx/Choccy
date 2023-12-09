@@ -60,13 +60,39 @@ func UploadDatabases(c *gin.Context) {
 		panic("无法识别数据库")
 	}
 
-	err = util.Unzip(dst, path.Join(settingPath.CodeQLDatabase,
-		file.Filename[:len(file.Filename)-len(filepath.Ext(file.Filename))]), level)
+	databasePath := path.Join(settingPath.CodeQLDatabase, file.Filename[:len(file.Filename)-len(filepath.Ext(file.Filename))])
+	err = util.Unzip(dst, databasePath, level)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	c.JSON(200, gin.H{
-		"data": "data",
+		"data": databasePath,
+	})
+}
+
+func DeleteDatabases(c *gin.Context) {
+	databaseName := c.DefaultQuery("name", "")
+
+	settingPath, err := util.GetSettingPath()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	databasePath, err := filepath.Abs(filepath.Join(settingPath.CodeQLDatabase, databaseName))
+	if err != nil {
+		panic(err.Error())
+	}
+	if filepath.Dir(databasePath) != settingPath.CodeQLDatabase {
+		panic("文件名错误")
+	}
+
+	err = os.RemoveAll(databasePath)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, gin.H{
+		"data": databasePath,
 	})
 }

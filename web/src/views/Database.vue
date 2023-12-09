@@ -89,7 +89,7 @@
 
 <script setup>
 import {onMounted, reactive, ref} from "vue";
-import {getDatabases} from "../api/database";
+import {deleteDatabases, getDatabases} from "../api/database";
 import {timeFormatter} from "../utils/formatter";
 import {Delete, Plus, QuestionFilled, SuccessFilled} from '@element-plus/icons-vue'
 import { UploadFilled } from '@element-plus/icons-vue'
@@ -109,10 +109,10 @@ const createData = () => {
 }
 const deleteData = (name) => {
   console.log("delete "+name)
-  // deleteSuite(name).then(response => {
-  //   fetchData();
-  //   ElMessage.success("删除成功")
-  // })
+  deleteDatabases(name).then(response => {
+    fetchData();
+    ElMessage.success("删除成功")
+  })
 }
 const dialogFormVisible = ref(false)
 const beforeUpload = (file) =>{

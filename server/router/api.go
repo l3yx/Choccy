@@ -30,6 +30,7 @@ func SetupApiRoutes(r *gin.Engine) {
 
 		apiRouter.GET("/database", handler.GetDatabases)
 		apiRouter.POST("/database", handler.UploadDatabases)
+		apiRouter.DELETE("/database", handler.DeleteDatabases)
 
 		apiRouter.GET("/result", handler.GetResult)
 		apiRouter.GET("/result/sarif", handler.GetResultSarif)
