@@ -367,6 +367,8 @@ const modeFormatter = (row, col, value, index) => {
     return "Release";
   } else if (value === 1) {
     return "原有数据库";
+  }else if (value === 2) {
+    return "自定义数据库";
   }
   return value;
 }
