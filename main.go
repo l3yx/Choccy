@@ -70,6 +70,7 @@ func run() {
 	{
 		gin.SetMode(gin.ReleaseMode)
 		r := gin.Default()
+		r.MaxMultipartMemory = 1024 << 20 //1G
 		r.Use(middleware.ErrorMiddleware)
 		r.Use(middleware.GetCorsMiddleware())
 

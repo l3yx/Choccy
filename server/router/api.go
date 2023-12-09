@@ -29,6 +29,7 @@ func SetupApiRoutes(r *gin.Engine) {
 		apiRouter.GET("/suite/resolve", handler.ResolveSuiteQueries)
 
 		apiRouter.GET("/database", handler.GetDatabases)
+		apiRouter.POST("/database", handler.UploadDatabases)
 
 		apiRouter.GET("/result", handler.GetResult)
 		apiRouter.GET("/result/sarif", handler.GetResultSarif)

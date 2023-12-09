@@ -3,6 +3,9 @@ package handler
 import (
 	"choccy/server/util"
 	"github.com/gin-gonic/gin"
+	"os"
+	"path"
+	"path/filepath"
 	"strconv"
 )
 
@@ -25,5 +28,45 @@ func GetDatabases(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"data":  data,
 		"total": total,
+	})
+}
+
+func UploadDatabases(c *gin.Context) {
+	file, _ := c.FormFile("file")
+
+	settingPath, err := util.GetSettingPath()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	tmpDir, err := util.GetTmpDir()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	dst := path.Join(tmpDir, file.Filename)
+	err = c.SaveUploadedFile(file, dst)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer os.Remove(dst)
+
+	level, err := util.CheckDatabaseZip(dst)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if level == -1 || level > 1 {
+		panic("无法识别数据库")
+	}
+
+	err = util.Unzip(dst, path.Join(settingPath.CodeQLDatabase,
+		file.Filename[:len(file.Filename)-len(filepath.Ext(file.Filename))]), level)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	c.JSON(200, gin.H{
+		"data": "data",
 	})
 }

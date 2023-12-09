@@ -34,6 +34,19 @@
     <el-table-column prop="ModTime" label="修改时间" sortable="custom"
                      :formatter="(row, col, value, index)=>timeFormatter(value)"
     />
+
+    <el-table-column fixed="right" label="">
+      <template #header>
+        <el-button style="float: right" :icon="Plus" @click="createData" circle/>
+      </template>
+      <template #default="scope">
+        <el-popconfirm title="确认删除?" :hide-after="0" @confirm="deleteData(scope.row.Name)">
+          <template #reference>
+            <el-button :icon="Delete" circle style="float: right;margin-left: 6px"/>
+          </template>
+        </el-popconfirm>
+      </template>
+    </el-table-column>
   </el-table>
 
   <el-pagination
@@ -46,17 +59,89 @@
       @size-change="fetchData"
       @current-change="fetchData"
   />
+
+  <el-dialog v-model="dialogFormVisible" title="上传数据库">
+    <el-upload
+        ref="uploader"
+        class="upload-demo"
+        drag
+        multiple
+        accept=".zip"
+        :action="getBaseURL()+'/database'"
+        :headers="{'X-Token':getToken()}"
+        :before-upload="beforeUpload"
+        :on-success="uploadSuccess"
+        :on-error="uploadError"
+        :on-progress="uploadProgress"
+    >
+      <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+      <div class="el-upload__text">
+        Drop file here or <em>click to upload</em>
+      </div>
+      <template #tip>
+        <div class="el-upload__tip">
+          only .zip file
+        </div>
+      </template>
+    </el-upload>
+  </el-dialog>
 </template>
 
 <script setup>
 import {onMounted, reactive, ref} from "vue";
 import {getDatabases} from "../api/database";
 import {timeFormatter} from "../utils/formatter";
-import {QuestionFilled,SuccessFilled } from '@element-plus/icons-vue'
+import {Delete, Plus, QuestionFilled, SuccessFilled} from '@element-plus/icons-vue'
+import { UploadFilled } from '@element-plus/icons-vue'
+import {ElMessage} from "element-plus";
+import {getBaseURL} from "../utils/request";
+import {getToken} from "../utils/auth";
 
 const emit = defineEmits(["refresh"]);
 
+
+const uploader = ref(null);
+const createData = () => {
+  // if(uploader.value){
+  //   uploader.value.clearFiles()
+  // }
+  dialogFormVisible.value = true
+}
+const deleteData = (name) => {
+  console.log("delete "+name)
+  // deleteSuite(name).then(response => {
+  //   fetchData();
+  //   ElMessage.success("删除成功")
+  // })
+}
+const dialogFormVisible = ref(false)
+const beforeUpload = (file) =>{
+  if(file.type !== "application/zip"){
+    ElMessage.error("只支持上传zip文件")
+    return false
+  }
+  return  true
+}
+const uploadSuccess = (response, uploadFile, uploadFiles) => {
+  if (response.err) {
+    ElMessage.error(response.err)
+  }else {
+    ElMessage.success("数据库导入成功")
+    fetchData()
+  }
+}
+const uploadError = (error, uploadFile, uploadFiles) => {
+  ElMessage.error(error.toString())
+}
+const uploadProgress = (evt, uploadFile, uploadFiles) => {
+  if(evt.percent===100){
+    ElMessage.success("上传成功，正在解压，请稍后")
+  }
+}
+
+
 const loading = ref(true)
+
 
 const tableData = ref()
 const paginate = reactive({

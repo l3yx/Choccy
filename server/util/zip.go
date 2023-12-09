@@ -47,3 +47,21 @@ func Unzip(src string, dest string, skip int) error {
 	}
 	return nil
 }
+
+func CheckDatabaseZip(src string) (int, error) {
+	level := -1
+
+	reader, err := zip.OpenReader(src)
+	if err != nil {
+		return level, err
+	}
+
+	defer reader.Close()
+	for _, file := range reader.File {
+		if file.FileInfo().Name() == "codeql-database.yml" {
+			level = len(strings.Split(file.Name, "/")) - 1
+			return level, nil
+		}
+	}
+	return level, nil
+}

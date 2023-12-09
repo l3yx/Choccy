@@ -36,4 +36,7 @@ request.interceptors.response.use(function (response) {
     return Promise.reject(error);
 });
 
+export function getBaseURL(){
+    return baseURL;
+}
 export default request
