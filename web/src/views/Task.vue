@@ -293,13 +293,13 @@ const newTask = () => {
 }
 const suites = ref()
 const initSuites = () => {
-  getSuites(1, -1, "", "").then(response => {
+  getSuites(1, -1, null, null).then(response => {
     suites.value = response.data
   })
 }
 const databases = ref()
 const initDatabases = () => {
-  getDatabases(1, -1, "", "").then(response => {
+  getDatabases(1, -1, null, null).then(response => {
     databases.value = response.data
   })
 }

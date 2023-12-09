@@ -205,7 +205,7 @@ const form = reactive({
 const suites = ref()
 
 const initSuites = () => {
-  getSuites(1, -1, "", "").then(response => {
+  getSuites(1, -1, null, null).then(response => {
     suites.value = response.data
   })
 }
