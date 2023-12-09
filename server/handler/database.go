@@ -61,6 +61,14 @@ func UploadDatabases(c *gin.Context) {
 	}
 
 	databasePath := path.Join(settingPath.CodeQLDatabase, file.Filename[:len(file.Filename)-len(filepath.Ext(file.Filename))])
+	_, err = os.Stat(databasePath)
+	if err == nil {
+		err = os.RemoveAll(databasePath) //删除旧的数据库
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	err = util.Unzip(dst, databasePath, level)
 	if err != nil {
 		panic(err.Error())
