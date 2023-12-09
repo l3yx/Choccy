@@ -1,0 +1,7 @@
+- description: java security sinks
+- queries: .
+  from: choccy/java
+- include:
+    tags contain: 
+      - security
+      - sink
