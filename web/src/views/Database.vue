@@ -116,7 +116,7 @@ const deleteData = (name) => {
 }
 const dialogFormVisible = ref(false)
 const beforeUpload = (file) =>{
-  if(file.type !== "application/zip"){
+  if(!file.name.endsWith(".zip")){
     ElMessage.error("只支持上传zip文件")
     return false
   }
