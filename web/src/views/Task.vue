@@ -17,7 +17,18 @@
         />
       </template>
     </el-table-column>
-    <el-table-column prop="ProjectName" label="项目名" sortable="custom"/>
+    <el-table-column prop="ProjectName" label="项目名" sortable="custom">
+      <template #default="scope">
+        <el-link
+            v-if="scope.row.ProjectOwner && scope.row.ProjectRepo"
+            type="primary" :href="'https://github.com/'+scope.row.ProjectOwner+'/'+scope.row.ProjectRepo"
+            target="_blank">{{scope.row.ProjectName}}</el-link>
+
+        <span v-if="!(scope.row.ProjectOwner && scope.row.ProjectRepo)">
+          {{scope.row.ProjectName}}
+        </span>
+      </template>
+    </el-table-column>
     <el-table-column prop="ProjectLanguage" label="语言" sortable="custom"/>
     <el-table-column prop="ProjectMode" :formatter="modeFormatter" label="扫描对象" sortable="custom"/>
     <el-table-column prop="Versions" label="扫描版本" width="100px">
