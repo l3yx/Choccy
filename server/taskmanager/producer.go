@@ -87,3 +87,25 @@ func AddCustomTask(databasePath string, suites []string, name string) (bool, err
 	CH <- task.ID
 	return true, nil
 }
+
+func AddGithubBatchTask(owner string, repo string, language string, suites []string) (bool, error) {
+	task := model.Task{
+		Manual:           true,
+		ProjectOwner:     owner,
+		ProjectRepo:      repo,
+		ProjectName:      fmt.Sprintf("%s/%s", owner, repo),
+		ProjectLanguage:  language,
+		ProjectMode:      1,
+		ProjectSuite:     suites,
+		Versions:         []string{},
+		AnalyzedVersions: []string{},
+	}
+	result := database.DB.Save(&task)
+	if result.Error != nil {
+		return false, result.Error
+	}
+
+	CH <- task.ID
+
+	return true, nil
+}

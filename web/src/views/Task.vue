@@ -44,9 +44,7 @@
     <el-table-column prop="Stage" label="任务阶段" sortable="custom">
       <template #default="scope">
         <el-icon :size="20" style="margin-top: 8px" v-if="scope.row.Stage === 0">
-          <el-tooltip content="更新检测" placement="top" :hide-after="10">
-            <Loading />
-          </el-tooltip>
+          <Loading />
         </el-icon>
         <el-icon  :size="20" style="margin-top: 8px" v-if="scope.row.Stage === 1">
           <el-tooltip content="资源下载" placement="top" :hide-after="10">
@@ -152,13 +150,15 @@
           <el-button style="float: right;margin-left: 6px" :icon="FolderOpened" @click="setTaskIsRead(null,true)"
                      circle/>
         </el-tooltip>
-        <el-tooltip
-            content="创建自定义任务"
-            placement="left-start"
-            :hide-after="10"
-        >
-          <el-button style="float: right;" :icon="Plus" @click="showDialogForm" circle/>
-        </el-tooltip>
+        <el-popover placement="left" width="320px" trigger="hover">
+          <template #reference>
+            <el-button style="float: right;" :icon="Plus" circle/>
+          </template>
+          <el-row>
+            <el-col :span="12"><el-button @click="showDialogForm">从已有数据库创建</el-button></el-col>
+            <el-col :span="12"><el-button @click="showGithubBatchTasksDialogForm">从GitHub批量创建</el-button></el-col>
+          </el-row>
+        </el-popover>
       </template>
       <template #default="scope">
         <el-tooltip
@@ -230,6 +230,83 @@
       </span>
     </template>
   </el-dialog>
+
+
+  <el-dialog v-model="githubBatchTasksDialogFormVisible" title="新建任务">
+    <el-form v-loading="githubBatchTasksDialogForm.loading" :model="githubBatchTasksDialogForm" label-width="68px">
+      <el-form-item label="搜索语句">
+        <el-input v-model="githubBatchTasksDialogForm.query" autocomplete="off" @change="githubBatchTasksDialogFormQueryChange">
+          <template #append >{{githubBatchTasksDialogForm.totalLoading?"...":githubBatchTasksDialogForm.total}}</template>
+        </el-input>
+      </el-form-item>
+
+      <el-form-item label="扫描范围">
+        <el-row :gutter="10">
+          <el-col :span="6">
+            <el-tooltip content="排序" placement="top" :hide-after="10">
+              <el-select v-model="githubBatchTasksDialogForm.sort" placeholder="sort" style="width:100%">
+                <el-option
+                    v-for="item in ['stars', 'forks', 'help-wanted-issues', 'updated']"
+                    :value="item"
+                />
+              </el-select>
+            </el-tooltip>
+          </el-col>
+          <el-col :span="6">
+            <el-select v-model="githubBatchTasksDialogForm.order" placeholder="order" style="width:100%">
+              <el-option
+                  v-for="item in ['desc', 'asc']"
+                  :value="item"
+              />
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-tooltip content="扫描数量" placement="top" :hide-after="10">
+              <el-input-number v-model="githubBatchTasksDialogForm.number" :min="0" :max="githubBatchTasksDialogForm.total - githubBatchTasksDialogForm.offset" style="width:100%"/>
+            </el-tooltip>
+          </el-col>
+          <el-col :span="6">
+            <el-tooltip content="偏移" placement="top" :hide-after="10">
+              <el-input-number v-model="githubBatchTasksDialogForm.offset" :min="0" :max="githubBatchTasksDialogForm.total" @change="githubBatchTasksDialogFormOffsetChange" style="width:100%"/>
+            </el-tooltip>
+          </el-col>
+        </el-row>
+      </el-form-item>
+
+      <el-form-item label="项目语言">
+        <el-select v-model="githubBatchTasksDialogForm.language" filterable allow-create placeholder="Select" style="width:100%"
+                   @change="githubBatchTasksDialogFormLanguageChange">
+          <el-option
+              v-for="item in ['java','go','python','cpp','csharp','swift','javascript','ruby']"
+              :value="item"
+          />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="查询套件">
+        <el-select v-model="githubBatchTasksDialogForm.suites" multiple
+                   filterable
+                   clearable
+                   ref="githubBatchTasksSuiteSelect"
+                   @change="githubBatchTasksSuiteSelectChange"
+                   placeholder="Select" style="width:100%">
+          <el-option
+              v-for="item in suites"
+              :value="item.Name"
+          />
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button :disabled="githubBatchTasksDialogForm.loading || githubBatchTasksDialogForm.totalLoading" @click="githubBatchTasksDialogFormVisible = false">Cancel</el-button>
+        <el-button :disabled="githubBatchTasksDialogForm.loading || githubBatchTasksDialogForm.totalLoading" type="primary" @click="newGithubBatchTasks">
+          Confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
+
 </template>
 
 <style>
@@ -247,7 +324,7 @@
 
 <script setup>
 import {onMounted, reactive, ref} from "vue";
-import {addTask, getTasks, setIsRead} from "../api/task.js";
+import {addGithubBatchTasks, addTask, getGithubRepositoryQueryTotal, getTasks, setIsRead} from "../api/task.js";
 import {timeFormatter} from "../utils/formatter";
 import {
   RemoveFilled,
@@ -316,6 +393,80 @@ const suiteSelectChange = () => {
   }
 }
 
+
+const githubBatchTasksDialogFormVisible = ref(false)
+const githubBatchTasksDialogForm = reactive({
+  loading: false,
+
+  query: 'language:java ',
+  sort: 'stars',
+  order: 'desc',
+  number: 0,
+  offset: 0,
+  language: 'java',
+  suites: [],
+
+  total: 0,
+  totalLoading : true
+})
+const showGithubBatchTasksDialogForm = () => {
+  githubBatchTasksDialogFormVisible.value = true
+  githubBatchTasksDialogFormQueryChange()
+}
+const githubBatchTasksSuiteSelect = ref(null);
+const githubBatchTasksSuiteSelectTimeout = ref(null);
+const githubBatchTasksSuiteSelectChange = () => {
+  if(githubBatchTasksDialogForm.suites.length>0){
+    if (githubBatchTasksSuiteSelectTimeout.value){
+      clearTimeout(githubBatchTasksSuiteSelectTimeout.value)
+    }
+    githubBatchTasksSuiteSelectTimeout.value = setTimeout(() => {
+      githubBatchTasksSuiteSelect.value.blur()
+    }, 500)
+  }
+}
+const githubBatchTasksDialogFormOffsetChange = () =>{
+   if(githubBatchTasksDialogForm.number > githubBatchTasksDialogForm.total-githubBatchTasksDialogForm.offset){
+     githubBatchTasksDialogForm.number = githubBatchTasksDialogForm.total-githubBatchTasksDialogForm.offset
+   }
+}
+const githubBatchTasksDialogFormLanguageChange =()=>{
+  githubBatchTasksDialogForm.query = githubBatchTasksDialogForm.query.replace(/language:\w+\s/,"language:"+githubBatchTasksDialogForm.language+" ")
+  githubBatchTasksDialogFormQueryChange()
+}
+const githubBatchTasksDialogFormQueryChange =()=>{
+  githubBatchTasksDialogForm.total = 0
+  githubBatchTasksDialogForm.totalLoading = true
+  getGithubRepositoryQueryTotal(githubBatchTasksDialogForm.query).then(response => {
+    githubBatchTasksDialogForm.total = response.data.total
+    githubBatchTasksDialogForm.totalLoading = false
+    if(githubBatchTasksDialogForm.offset > githubBatchTasksDialogForm.total){
+      githubBatchTasksDialogForm.offset = 0
+      githubBatchTasksDialogForm.number = 0
+    }
+  })
+}
+const newGithubBatchTasks = () => {
+  githubBatchTasksDialogForm.loading = true
+  addGithubBatchTasks(
+      githubBatchTasksDialogForm.query,
+      githubBatchTasksDialogForm.sort,
+      githubBatchTasksDialogForm.order,
+      githubBatchTasksDialogForm.number,
+      githubBatchTasksDialogForm.offset,
+      githubBatchTasksDialogForm.language,
+      githubBatchTasksDialogForm.suites
+  ).then(response => {
+    fetchData();
+    githubBatchTasksDialogFormVisible.value = false;
+    if (response.data.success) {
+          ElMessage.success("新建成功")
+        }
+    emit("refresh")
+  }).finally(()=>{
+    githubBatchTasksDialogForm.loading = false
+  })
+}
 
 
 const loading = ref(true)

@@ -36,6 +36,26 @@ export function addTask(database, suites, name) {
     })
 }
 
+export function addGithubBatchTasks(query,sort,order,number,offset,language,suites) {
+    return request.post('/task/github',{
+        query,
+        sort,
+        order,
+        number,
+        offset,
+        language,
+        suites
+    })
+}
+
 export function getTaskUnread() {
     return request.get('/task/unread')
+}
+
+export function getGithubRepositoryQueryTotal(query) {
+    return request.get('/task/github/query',{
+        params:{
+            query: query
+        }
+    })
 }

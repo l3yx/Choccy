@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -251,4 +252,36 @@ func GetGithubTag(owner string, repo string, tagName string) (*GithubTag, error)
 	}
 
 	return &targetTag, err
+}
+
+type GithubRepositorySearch struct {
+	Total int                `json:"total_count"`
+	Items []GithubRepository `json:"items"`
+}
+
+type GithubRepository struct {
+	Name        string                `json:"name"`
+	FullName    string                `json:"full_name"`
+	Owner       GithubRepositoryOwner `json:"owner"`
+	Url         string                `json:"html_url"`
+	Description string                `json:"description"`
+}
+type GithubRepositoryOwner struct {
+	Login string `json:"login"`
+}
+
+func SearchGithubRepository(query string, sort string, order string, perPage int, page int) (*GithubRepositorySearch, error) {
+
+	api := fmt.Sprintf("https://api.github.com/search/repositories?q=%s&sort=%s&order=%s&per_page=%d&page=%d", url.QueryEscape(query), url.QueryEscape(sort), order, perPage, page)
+	res, err := githubRequest(api)
+	if err != nil {
+		return nil, err
+	}
+	var githubRepositorySearch GithubRepositorySearch
+	err = json.Unmarshal(res, &githubRepositorySearch)
+	if err != nil {
+		return nil, err
+	}
+
+	return &githubRepositorySearch, nil
 }

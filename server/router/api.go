@@ -42,8 +42,10 @@ func SetupApiRoutes(r *gin.Engine) {
 		apiRouter.GET("/task/run", handler.RunTask)
 		apiRouter.GET("/task", handler.GetTasks)
 		apiRouter.POST("/task", handler.AddTask)
+		apiRouter.POST("/task/github", handler.AddGithubBatchTasks)
 		apiRouter.GET("/task/unread", handler.GetTaskUnread)
 		apiRouter.POST("/task/read", handler.SetTaskIsRead)
+		apiRouter.GET("/task/github/query", handler.GetGithubRepositoryQueryTotal)
 
 		apiRouter.GET("/notifications", handler.GetNotifications)
 	}
