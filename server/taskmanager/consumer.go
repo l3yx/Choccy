@@ -195,7 +195,7 @@ func Consumer() {
 				processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
 				processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
 				processor.AddTaskAnalyzedVersion(&task, "null")
-				processor.CreateTaskResult("null", "nul", resultFileName, len(codeQLSarif.Results), task.ID)
+				processor.CreateTaskResult("null", "null", resultFileName, len(codeQLSarif.Results), task.ID)
 			} else {
 				panic("未知扫描模式：" + strconv.Itoa(task.ProjectMode))
 			}
