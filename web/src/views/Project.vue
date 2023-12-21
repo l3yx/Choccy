@@ -156,7 +156,7 @@ const loading = ref(true)
 
 const tableData = ref()
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const total = ref(100)
 
 
