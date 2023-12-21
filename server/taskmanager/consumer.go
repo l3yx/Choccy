@@ -180,7 +180,9 @@ func Consumer() {
 				processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
 				processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
 				processor.AddTaskAnalyzedVersion(&task, databaseCommit)
-				processor.SetProjectLastAnalyzeDatabaseCommit(&project, databaseCommit)
+				if project.ID != 0 {
+					processor.SetProjectLastAnalyzeDatabaseCommit(&project, databaseCommit)
+				}
 				processor.CreateTaskResult(databaseCommit, databaseCommit, resultFileName, len(codeQLSarif.Results), task.ID)
 			} else if task.ProjectMode == 2 { //自定义
 				processor.SetTaskStage(&task, 3) // 扫描
