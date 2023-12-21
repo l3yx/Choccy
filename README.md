@@ -137,6 +137,20 @@ docker logs choccy
 
 
 
+### 批量选择GitHub项目进行扫描
+
+在`任务`页面，选中右上角的加号图标，点击`从GitHub批量创建`
+
+![image-20231221165209187](./README/image-20231221165209187.png)
+
+`搜索语句`为对仓库的检索，语法参考：https://docs.github.com/en/rest/search/search?apiVersion=2022-11-28#search-repositories
+
+`扫描范围`指的是按某种顺序排序后，取出哪一部分进行扫描。如下截图中，将按star数量逆序排序，并扫描第11和第12个仓库
+
+![image-20231221165319202](./README/image-20231221165319202.png)
+
+
+
 ## 贡献者
 
 * [淚笑](https://l3yx.github.io/)（核心开发）
