@@ -34,7 +34,7 @@
       style="margin-top: 20px"
       v-model:current-page="paginate.currentPage"
       v-model:page-size="paginate.pageSize"
-      :page-sizes="[1, 5, 10, 15, 20, 50]"
+      :page-sizes="[1, 10, 20, 50, 100]"
       layout="total, sizes, prev, pager, next"
       v-model:total="paginate.total"
       @size-change="fetchData"
