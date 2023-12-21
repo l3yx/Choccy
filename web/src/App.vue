@@ -16,10 +16,10 @@
           <el-menu-item index="/suite">查询套件</el-menu-item>
           <el-menu-item index="/database">数据库</el-menu-item>
           <el-menu-item index="/task">
-            <el-badge :value="unread.task" :hidden="unread.task===0" class="item">任务</el-badge>
+            <el-badge :value="unread.task" :max="999" :hidden="unread.task===0" class="item">任务</el-badge>
           </el-menu-item>
           <el-menu-item index="/result">
-            <el-badge :value="unread.result" :hidden="unread.result===0" class="item">分析结果</el-badge>
+            <el-badge :value="unread.result" :max="999" :hidden="unread.result===0" class="item">分析结果</el-badge>
           </el-menu-item>
           <el-menu-item index="/setting">设置</el-menu-item>
         </el-menu>
