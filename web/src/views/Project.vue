@@ -280,7 +280,7 @@ const suiteSelectChange = () => {
     }
     suiteSelectTimeout.value = setTimeout(() => {
       suiteSelect.value.blur()
-    }, 500)
+    }, 10)
   }
 }
 

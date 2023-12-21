@@ -400,7 +400,7 @@ const suiteSelectChange = () => {
     }
     suiteSelectTimeout.value = setTimeout(() => {
       suiteSelect.value.blur()
-    }, 500)
+    }, 10)
   }
 }
 
@@ -433,7 +433,7 @@ const githubBatchTasksSuiteSelectChange = () => {
     }
     githubBatchTasksSuiteSelectTimeout.value = setTimeout(() => {
       githubBatchTasksSuiteSelect.value.blur()
-    }, 500)
+    }, 10)
   }
 }
 const githubBatchTasksDialogFormOffsetChange = () =>{
