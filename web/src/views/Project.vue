@@ -80,7 +80,7 @@
         style="margin-top: 20px"
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
-        :page-sizes="[1, 10, 20, 50, 100]"
+        :page-sizes="[1, 10, 50, 100, 500]"
         layout="total, sizes, prev, pager, next"
         v-model:total="total"
         @size-change="fetchData"
