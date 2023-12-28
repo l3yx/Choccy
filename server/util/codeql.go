@@ -252,10 +252,8 @@ func DatabaseAnalyze(databasePath, qls, outName string) (string, string, error, 
 		qls,
 		"--format", "sarif-latest",
 		"--output", outputPath,
-		"--threads", "0",
 		"--rerun",
 		"--sarif-add-snippets",
-		"--no-group-results",
 	}
 
 	searchPath := getSearchPath()
