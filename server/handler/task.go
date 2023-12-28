@@ -233,7 +233,7 @@ func AddGithubBatchTasks(c *gin.Context) {
 	for len(githubRepositories) < task.Number {
 		githubRepositorySearch, err := util.SearchGithubRepository(task.Query, task.Sort, task.Order, perPage, page)
 		if err != nil {
-			panic(err)
+			panic(err.Error())
 		}
 
 		if len(githubRepositories) == 0 {
@@ -256,7 +256,7 @@ func AddGithubBatchTasks(c *gin.Context) {
 	for _, githubRepository := range githubRepositories {
 		_, err = taskmanager.AddGithubBatchTask(githubRepository.Owner.Login, githubRepository.Name, task.Language, task.Suites)
 		if err != nil {
-			panic(err)
+			panic(err.Error())
 		}
 	}
 
