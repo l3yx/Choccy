@@ -53,6 +53,6 @@ func recoveryTask() {
 }
 
 func InitTask() {
-	CH = make(chan uint, 1000)
+	CH = make(chan uint, 10000)
 	recoveryTask()
 }
