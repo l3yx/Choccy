@@ -47,7 +47,7 @@ func SetEnv(envToSet string) {
 			if len(keyValue) == 2 { //reg := regexp.MustCompile(`^[A-Za-z0-9_.\s]+$`)
 				err := os.Unsetenv(keyValue[0])
 				if err != nil {
-					panic(err.Error())
+					log.Println("Error: " + err.Error() + " Code: os.Unsetenv" + keyValue[0])
 				}
 			}
 		}
@@ -57,7 +57,7 @@ func SetEnv(envToSet string) {
 	for key, value := range envMap {
 		err := os.Setenv(key, value)
 		if err != nil {
-			panic(err.Error())
+			log.Println("Error: " + err.Error() + " Code: os.Setenv" + key + ", " + value)
 		}
 	}
 
@@ -78,7 +78,7 @@ func SetEnv(envToSet string) {
 
 				err := os.Setenv(key, value)
 				if err != nil {
-					panic(err.Error())
+					log.Println("Error: " + err.Error() + " Code: os.Setenv" + key + ", " + value)
 				}
 			}
 		}
