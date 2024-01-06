@@ -45,9 +45,11 @@ func SetEnv(envToSet string) {
 		for _, env := range envs {
 			keyValue := strings.SplitN(env, "=", 2)
 			if len(keyValue) == 2 { //reg := regexp.MustCompile(`^[A-Za-z0-9_.\s]+$`)
-				err := os.Unsetenv(keyValue[0])
-				if err != nil {
-					log.Println("Error: " + err.Error() + " Code: os.Unsetenv" + keyValue[0])
+				if strings.TrimSpace(keyValue[0]) != "" {
+					err := os.Unsetenv(keyValue[0])
+					if err != nil {
+						log.Println("Error: " + err.Error() + " Code: os.Unsetenv" + keyValue[0])
+					}
 				}
 			}
 		}
@@ -55,9 +57,11 @@ func SetEnv(envToSet string) {
 
 	//还原系统原有环境变量
 	for key, value := range envMap {
-		err := os.Setenv(key, value)
-		if err != nil {
-			log.Println("Error: " + err.Error() + " Code: os.Setenv" + key + ", " + value)
+		if strings.TrimSpace(key) != "" && strings.TrimSpace(value) != "" {
+			err := os.Setenv(key, value)
+			if err != nil {
+				log.Println("Error: " + err.Error() + " Code: os.Setenv" + key + ", " + value)
+			}
 		}
 	}
 
@@ -71,15 +75,18 @@ func SetEnv(envToSet string) {
 				key := strings.TrimSpace(keyValue[0])
 				value := strings.TrimSpace(keyValue[1])
 
-				re := regexp.MustCompile(`\${(.+?)}`)
-				value = re.ReplaceAllStringFunc(value, func(match string) string {
-					return os.Getenv(match[2 : len(match)-1])
-				})
+				if key != "" && value != "" {
+					re := regexp.MustCompile(`\${(.+?)}`)
+					value = re.ReplaceAllStringFunc(value, func(match string) string {
+						return os.Getenv(match[2 : len(match)-1])
+					})
 
-				err := os.Setenv(key, value)
-				if err != nil {
-					log.Println("Error: " + err.Error() + " Code: os.Setenv" + key + ", " + value)
+					err := os.Setenv(key, value)
+					if err != nil {
+						log.Println("Error: " + err.Error() + " Code: os.Setenv" + key + ", " + value)
+					}
 				}
+
 			}
 		}
 	}
