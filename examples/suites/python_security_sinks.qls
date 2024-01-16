@@ -1,0 +1,7 @@
+- description: python security sinks
+- queries: .
+  from: choccy/python
+- include:
+    tags contain: 
+      - security
+      - sink
