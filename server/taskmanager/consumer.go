@@ -42,6 +42,21 @@ func Consumer() {
 				}
 			}
 
+			if task.ProjectMode == 4 {
+				processor.WriteTaskLog(&task, "扫描模式为自动选择，将按照 原有数据库，Release，默认分支 的顺序选择")
+				_, err := util.GetGithubDatabase(task.ProjectOwner, task.ProjectRepo, task.ProjectLanguage)
+				if err != nil {
+					_, err = util.GetGithubReleaseLatest(task.ProjectOwner, task.ProjectRepo)
+					if err != nil {
+						task.ProjectMode = 3
+					} else {
+						task.ProjectMode = 0
+					}
+				} else {
+					task.ProjectMode = 1
+				}
+			}
+
 			var modelStr string
 			if task.ProjectMode == 0 {
 				modelStr = "Release"
@@ -64,31 +79,41 @@ func Consumer() {
 			)
 
 			if task.ProjectMode == 0 { //Release
-				// 新版判断
-				processor.SetTaskStage(&task, 0) //新版本判断
-				tags, latestRelease := processor.CheckReleaseUpdates(&task, project.LastAnalyzeReleaseTag, &project)
-				if len(tags) == 0 {
-					if !task.Manual {
-						processor.WriteTaskLog(&task, "当前没有新版本，结束任务")
-						processor.SetTaskStatus(&task, 2) //任务完成
-						return
+				var tags []string
+				if project.ID != 0 {
+					// 新版判断
+					processor.SetTaskStage(&task, 0) //新版本判断
+					tags, latestRelease := processor.CheckReleaseUpdates(&task, project.LastAnalyzeReleaseTag, &project)
+					if len(tags) == 0 {
+						if !task.Manual {
+							processor.WriteTaskLog(&task, "当前没有新版本，结束任务")
+							processor.SetTaskStatus(&task, 2) //任务完成
+							return
+						} else {
+							processor.WriteTaskLog(&task, "当前没有新版本，但该任务手动触发，默认扫描当前最新版："+latestRelease.TagName)
+							tags = []string{latestRelease.TagName}
+						}
 					} else {
-						processor.WriteTaskLog(&task, "当前没有新版本，但该任务手动触发，默认扫描当前最新版："+latestRelease.TagName)
-						tags = []string{latestRelease.TagName}
+						processor.WriteTaskLog(&task, "获取到新版本："+strings.Join(tags, "，"))
 					}
 				} else {
-					processor.WriteTaskLog(&task, "获取到新版本："+strings.Join(tags, "，"))
+					// 任务没有对应的project, 为github批量任务
+					releaseLatest, err := util.GetGithubReleaseLatest(task.ProjectOwner, task.ProjectRepo)
+					if err != nil {
+						panic("获取数据库失败：" + err.Error())
+					}
+					tags = []string{releaseLatest.TagName}
+					processor.WriteTaskLog(&task, "扫描版本："+releaseLatest.TagName)
 				}
 
 				processor.SetTaskVersions(&task, tags)
-
 				for _, tag := range tags {
 					databaseName := fmt.Sprintf("%s__%s__%s__r__%s",
 						task.ProjectOwner,
 						task.ProjectRepo,
 						task.ProjectLanguage,
 						tag)
-					githubTag, err := util.GetGithubTag(project.Owner, project.Repo, tag)
+					githubTag, err := util.GetGithubTag(task.ProjectOwner, task.ProjectRepo, tag)
 					if err != nil {
 						panic("获取tag对应的commit失败：" + err.Error())
 					}
@@ -121,7 +146,9 @@ func Consumer() {
 					processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
 					processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
 					processor.AddTaskAnalyzedVersion(&task, tag)
-					processor.SetProjectLastAnalyzeReleaseTag(&project, tag)
+					if project.ID != 0 {
+						processor.SetProjectLastAnalyzeReleaseTag(&project, tag)
+					}
 					processor.CreateTaskResult(tag, githubTag.Commit.Sha, resultFileName, len(codeQLSarif.Results), task.ID)
 				}
 			} else if task.ProjectMode == 1 { //原有数据库
@@ -199,19 +226,30 @@ func Consumer() {
 				processor.AddTaskAnalyzedVersion(&task, "null")
 				processor.CreateTaskResult("null", "null", resultFileName, len(codeQLSarif.Results), task.ID)
 			} else if task.ProjectMode == 3 { //默认分支
-				// 新版判断
-				processor.SetTaskStage(&task, 0) //新版本判断
-				defaultBranchCommit := processor.CheckDefaultBranchUpdates(&task, &project)
-				if defaultBranchCommit == project.LastAnalyzeDefaultBranchCommit {
-					if !task.Manual {
-						processor.WriteTaskLog(&task, "当前没有新版本，结束任务")
-						processor.SetTaskStatus(&task, 2) //任务完成
-						return
+				var defaultBranchCommit string
+				if project.ID != 0 {
+					// 新版判断
+					processor.SetTaskStage(&task, 0) //新版本判断
+					defaultBranchCommit = processor.CheckDefaultBranchUpdates(&task, &project)
+					if defaultBranchCommit == project.LastAnalyzeDefaultBranchCommit {
+						if !task.Manual {
+							processor.WriteTaskLog(&task, "当前没有新版本，结束任务")
+							processor.SetTaskStatus(&task, 2) //任务完成
+							return
+						} else {
+							processor.WriteTaskLog(&task, "当前没有新版本，但该任务手动触发，默认扫描当前最新版："+defaultBranchCommit)
+						}
 					} else {
-						processor.WriteTaskLog(&task, "当前没有新版本，但该任务手动触发，默认扫描当前最新版："+defaultBranchCommit)
+						processor.WriteTaskLog(&task, "获取到新版本："+defaultBranchCommit)
 					}
 				} else {
-					processor.WriteTaskLog(&task, "获取到新版本："+defaultBranchCommit)
+					// 任务没有对应的project, 为github批量任务
+					branch, err := util.GetGithubDefaultBranch(task.ProjectOwner, task.ProjectRepo)
+					if err != nil {
+						panic("获取数据库失败：" + err.Error())
+					}
+					defaultBranchCommit = branch.Commit.Sha
+					processor.WriteTaskLog(&task, "扫描版本："+defaultBranchCommit)
 				}
 				processor.SetTaskVersions(&task, []string{defaultBranchCommit})
 				databaseCommitAbbr := defaultBranchCommit
@@ -253,7 +291,9 @@ func Consumer() {
 				processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
 				processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
 				processor.AddTaskAnalyzedVersion(&task, defaultBranchCommit)
-				processor.SetProjectLastAnalyzeDefaultBranchCommit(&project, defaultBranchCommit)
+				if project.ID != 0 {
+					processor.SetProjectLastAnalyzeDefaultBranchCommit(&project, defaultBranchCommit)
+				}
 				processor.CreateTaskResult(defaultBranchCommit, defaultBranchCommit, resultFileName, len(codeQLSarif.Results), task.ID)
 
 			} else {

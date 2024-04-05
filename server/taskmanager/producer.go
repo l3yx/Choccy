@@ -95,7 +95,7 @@ func AddGithubBatchTask(owner string, repo string, language string, suites []str
 		ProjectRepo:      repo,
 		ProjectName:      fmt.Sprintf("%s/%s", owner, repo),
 		ProjectLanguage:  language,
-		ProjectMode:      1,
+		ProjectMode:      4,
 		ProjectSuite:     suites,
 		Versions:         []string{},
 		AnalyzedVersions: []string{},

@@ -531,6 +531,10 @@ const modeFormatter = (row, col, value, index) => {
     return "原有数据库";
   }else if (value === 2) {
     return "自定义数据库";
+  }else if (value === 3) {
+    return "默认分支";
+  }else if (value === 4) {
+    return "自动选择";
   }
   return value;
 }
