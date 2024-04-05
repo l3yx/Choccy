@@ -131,6 +131,15 @@ func AddTaskAnalyzedVersion(task *model.Task, version string) {
 	}
 }
 
+func SetProjectLastAnalyzeDefaultBranchCommit(project *model.Project, tag string) {
+	project.LastAnalyzeDefaultBranchCommit = tag
+	project.LastAnalyzeTime = time.Now()
+	result := database.DB.Save(project)
+	if result.Error != nil {
+		panic(result.Error.Error())
+	}
+}
+
 func SetProjectLastAnalyzeReleaseTag(project *model.Project, tag string) {
 	project.LastAnalyzeReleaseTag = tag
 	project.LastAnalyzeTime = time.Now()

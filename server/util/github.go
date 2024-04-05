@@ -260,11 +260,12 @@ type GithubRepositorySearch struct {
 }
 
 type GithubRepository struct {
-	Name        string                `json:"name"`
-	FullName    string                `json:"full_name"`
-	Owner       GithubRepositoryOwner `json:"owner"`
-	Url         string                `json:"html_url"`
-	Description string                `json:"description"`
+	Name          string                `json:"name"`
+	FullName      string                `json:"full_name"`
+	Owner         GithubRepositoryOwner `json:"owner"`
+	Url           string                `json:"html_url"`
+	Description   string                `json:"description"`
+	DefaultBranch string                `json:"default_branch"`
 }
 type GithubRepositoryOwner struct {
 	Login string `json:"login"`
@@ -284,4 +285,62 @@ func SearchGithubRepository(query string, sort string, order string, perPage int
 	}
 
 	return &githubRepositorySearch, nil
+}
+
+func GetGithubRepository(owner string, repo string) (*GithubRepository, error) {
+	api := fmt.Sprintf("https://api.github.com/repos/%s/%s", owner, repo)
+	res, err := githubRequest(api)
+	if err != nil {
+		return nil, err
+	}
+	var githubRepository GithubRepository
+	err = json.Unmarshal(res, &githubRepository)
+	if err != nil {
+		return nil, err
+	}
+	return &githubRepository, nil
+}
+
+type GithubBranch struct {
+	Name   string       `json:"name"`
+	Commit GithubCommit `json:"commit"`
+}
+type GithubCommitCommitUser struct {
+	Name string    `json:"name"`
+	Date time.Time `json:"date"`
+}
+type GithubCommitCommit struct {
+	Committer GithubCommitCommitUser `json:"committer"`
+	Author    GithubCommitCommitUser `json:"author"`
+}
+type GithubCommit struct {
+	Sha    string             `json:"sha"`
+	Url    string             `json:"url"`
+	Commit GithubCommitCommit `json:"commit"`
+}
+
+func GetGithubBranch(owner string, repo string, branchName string) (*GithubBranch, error) {
+	api := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/%s", owner, repo, branchName)
+	res, err := githubRequest(api)
+	if err != nil {
+		return nil, err
+	}
+	var githubBranch GithubBranch
+	err = json.Unmarshal(res, &githubBranch)
+	if err != nil {
+		return nil, err
+	}
+	return &githubBranch, nil
+}
+
+func GetGithubDefaultBranch(owner string, repo string) (*GithubBranch, error) {
+	repository, err := GetGithubRepository(owner, repo)
+	if err != nil {
+		return nil, err
+	}
+	branch, err := GetGithubBranch(owner, repo, repository.DefaultBranch)
+	if err != nil {
+		return nil, err
+	}
+	return branch, nil
 }

@@ -85,7 +85,7 @@ func GetProjects(c *gin.Context) {
 						projects[i].LatestVersion = release.TagName
 						projects[i].LatestVersionUpdateTime = release.CreatedAt
 					}
-				} else if projects[i].Mode == 1 { //Database
+				} else if projects[i].Mode == 1 { //原有数据库
 					githubDatabase, err := util.GetGithubDatabase(projects[i].Owner, projects[i].Repo, projects[i].Language)
 					if err != nil {
 						log.Println("Error: " + err.Error())
@@ -95,8 +95,19 @@ func GetProjects(c *gin.Context) {
 						projects[i].LatestVersion = githubDatabase.CommitOid
 						projects[i].LatestVersionUpdateTime = githubDatabase.CreatedAt
 					}
+				} else if projects[i].Mode == 3 { //默认分支
+					branch, err := util.GetGithubDefaultBranch(projects[i].Owner, projects[i].Repo)
+					if err != nil {
+						log.Println("Error: " + err.Error())
+						projects[i].LatestVersion = "[Error]"
+						projects[i].LatestVersionErrorInfo = err.Error()
+					} else {
+						projects[i].LatestVersion = branch.Commit.Sha
+						projects[i].LatestVersionUpdateTime = branch.Commit.Commit.Committer.Date
+					}
 				} else {
 					projects[i].LatestVersion = "[Error]"
+					projects[i].LatestVersionErrorInfo = "未知扫描模式"
 				}
 				projects[i].LatestVersionCheckTime = time.Now()
 				projects[i].LatestVersionCheckMode = projects[i].Mode

@@ -49,6 +49,8 @@ func Consumer() {
 				modelStr = "原有数据库"
 			} else if task.ProjectMode == 2 {
 				modelStr = "自定义"
+			} else if task.ProjectMode == 3 {
+				modelStr = "默认分支"
 			} else {
 				modelStr = "未知"
 			}
@@ -196,6 +198,64 @@ func Consumer() {
 				processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
 				processor.AddTaskAnalyzedVersion(&task, "null")
 				processor.CreateTaskResult("null", "null", resultFileName, len(codeQLSarif.Results), task.ID)
+			} else if task.ProjectMode == 3 { //默认分支
+				// 新版判断
+				processor.SetTaskStage(&task, 0) //新版本判断
+				defaultBranchCommit := processor.CheckDefaultBranchUpdates(&task, &project)
+				if defaultBranchCommit == project.LastAnalyzeDefaultBranchCommit {
+					if !task.Manual {
+						processor.WriteTaskLog(&task, "当前没有新版本，结束任务")
+						processor.SetTaskStatus(&task, 2) //任务完成
+						return
+					} else {
+						processor.WriteTaskLog(&task, "当前没有新版本，但该任务手动触发，默认扫描当前最新版："+defaultBranchCommit)
+					}
+				} else {
+					processor.WriteTaskLog(&task, "获取到新版本："+defaultBranchCommit)
+				}
+				processor.SetTaskVersions(&task, []string{defaultBranchCommit})
+				databaseCommitAbbr := defaultBranchCommit
+				if len(defaultBranchCommit) > 7 {
+					databaseCommitAbbr = defaultBranchCommit[:7]
+				}
+				databaseName := fmt.Sprintf("%s__%s__%s__b__%s",
+					task.ProjectOwner,
+					task.ProjectRepo,
+					task.ProjectLanguage,
+					databaseCommitAbbr)
+
+				processor.CheckAndRemoveUnValidDatabase(&task, databaseName)
+				databasePath := util.IsCodeQLDatabaseExists(databaseName)
+				if databasePath == "" {
+					//下载新版本
+					processor.SetTaskStage(&task, 1) // 下载新版本
+					tagSourcePath := processor.DownloadCommit(&task, defaultBranchCommit)
+					defer func() {
+						processor.WriteTaskLog(&task, "清理代码："+tagSourcePath)
+						os.RemoveAll(tagSourcePath)
+					}()
+
+					//编译数据库
+					processor.SetTaskStage(&task, 2) // 编译数据库
+					databasePath = processor.CreateDatabase(&task, tagSourcePath, databaseName)
+				} else {
+					processor.WriteTaskLog(&task, fmt.Sprintf("数据库 %s 有效，跳过源码下载和数据库构建", databaseName))
+				}
+
+				//扫描
+				processor.SetTaskStage(&task, 3)
+				resultFileName, resultFilePath := processor.Analyze(&task, databasePath, databaseCommitAbbr)
+				codeQLSarif, err := util.ParseSarifFile(resultFilePath, false)
+				if err != nil {
+					panic("分析结果解析错误：" + err.Error())
+				}
+				resultCount += len(codeQLSarif.Results)
+				processor.AddTaskTotalResultsCount(&task, len(codeQLSarif.Results))
+				processor.WriteTaskLog(&task, fmt.Sprintf("扫描结果数量：%d", len(codeQLSarif.Results)))
+				processor.AddTaskAnalyzedVersion(&task, defaultBranchCommit)
+				processor.SetProjectLastAnalyzeDefaultBranchCommit(&project, defaultBranchCommit)
+				processor.CreateTaskResult(defaultBranchCommit, defaultBranchCommit, resultFileName, len(codeQLSarif.Results), task.ID)
+
 			} else {
 				panic("未知扫描模式：" + strconv.Itoa(task.ProjectMode))
 			}

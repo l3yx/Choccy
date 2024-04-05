@@ -16,9 +16,10 @@ type Project struct {
 	Suite    StrArr
 	Pause    bool
 
-	LastAnalyzeTime           time.Time
-	LastAnalyzeReleaseTag     string
-	LastAnalyzeDatabaseCommit string
+	LastAnalyzeTime                time.Time
+	LastAnalyzeReleaseTag          string
+	LastAnalyzeDatabaseCommit      string
+	LastAnalyzeDefaultBranchCommit string
 
 	LatestVersion           string
 	LatestVersionErrorInfo  string //如果版本获取失败，用来保存失败信息

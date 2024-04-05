@@ -41,6 +41,7 @@
           >
             <span v-if="scope.row.Mode == 0">{{ releaseVersionFormatter(scope.row.LatestVersion) }}</span>
             <span v-if="scope.row.Mode == 1">{{ commitVersionFormatter(scope.row.LatestVersion) }}</span>
+            <span v-if="scope.row.Mode == 3">{{ commitVersionFormatter(scope.row.LatestVersion) }}</span>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -52,6 +53,7 @@
         <template #default="scope">
           <span v-if="scope.row.Mode == 0">{{ releaseVersionFormatter(scope.row.LastAnalyzeReleaseTag) }}</span>
           <span v-if="scope.row.Mode == 1">{{ commitVersionFormatter(scope.row.LastAnalyzeDatabaseCommit) }}</span>
+          <span v-if="scope.row.Mode == 3">{{ commitVersionFormatter(scope.row.LastAnalyzeDefaultBranchCommit) }}</span>
         </template>
       </el-table-column>
 
@@ -116,7 +118,7 @@
         <el-form-item label="扫描模式">
           <el-select v-model="form.Mode" class="m-2" placeholder="Select" style="width:100%">
             <el-option
-                v-for="item in [{'label':'Release',value:0},{'label':'原有数据库',value:1}]"
+                v-for="item in [{'label':'Release',value:0},{'label':'原有数据库',value:1},{'label':'默认分支',value:3}]"
                 :label="item.label"
                 :value="item.value"
             />
@@ -187,6 +189,8 @@ const modeFormatter = (row, col, value, index) => {
     return "Release";
   } else if (value === 1) {
     return "原有数据库";
+  } else if (value === 3) {
+    return "默认分支";
   }
   return value;
 }
