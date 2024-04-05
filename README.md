@@ -56,6 +56,31 @@ docker logs choccy
 
 
 
+### Docker Compose运行
+
+`docker-compose.yml` :
+
+```yaml
+services:
+  choccy:
+    image: l3yx/choccy
+    container_name: choccy
+    environment:
+      TZ: "Asia/Shanghai"
+    entrypoint: ./choccy
+    volumes:
+      - ~/choccy_data:/root/choccy_data
+    ports:
+      - 8080:80
+    restart: always
+```
+
+```shell
+docker compose up -d
+```
+
+
+
 ### 二进制文件运行
 
 运行前需要自行配置好代码编译环境，CodeQL环境，并设置环境变量。
