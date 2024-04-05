@@ -50,7 +50,7 @@ docker logs choccy
 
 
 
-在Docker容器中未配置各语言的编译环境，只预置了CodeQL二进制文件和官方库，所以默认只能选择`原有数据库`这个扫描模式。
+在Docker容器中未配置各语言的编译环境，只预置了CodeQL二进制文件和官方库，所以默认只能选择`原有数据库`这个扫描模式，当然也可以自行在容器中安装各语言的编译环境并配置环境变量。
 
 另外CodeQL对性能有一定要求，配置过低的机器可能会运行非常缓慢或者失败。配置要求参考：https://docs.github.com/zh/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/recommended-hardware-resources-for-running-codeql
 
