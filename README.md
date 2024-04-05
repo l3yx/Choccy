@@ -77,7 +77,7 @@ docker logs choccy
 
 使用前配置好CodeQL环境，最好也在`设置`中配好GitHub Token，否则可能会被GitHub api限制访问。`设置` - `其他` -`CodeQL附加命令行选项` 中的`--ram 2048`是允许CodeQL使用的最大内存，单位为MB，请根据自己系统的配置酌情调高，否则可能影响扫描速度或造成扫描失败。
 
-目前支持GitHub仓库的Release扫描和原有CodeQL数据库扫描，GitHub会对很多仓库自动编译CodeQL数据库（可以通过接口 `https://api.github.com/repos/<owner>/<repo>/code-scanning/codeql/databases` 查看），这会省去配置本地编译环境的步骤和本地编译数据库的时间，所以扫描模式优先选择原有数据库，以[java-sec-code](https://github.com/JoyChou93/java-sec-code)这个项目为例：
+目前支持GitHub仓库的Release扫描、默认分支扫描、原有CodeQL数据库扫描，GitHub会对很多仓库自动编译CodeQL数据库（可以通过接口 `https://api.github.com/repos/<owner>/<repo>/code-scanning/codeql/databases` 查看），这会省去配置本地编译环境的步骤和本地编译数据库的时间，所以扫描模式优先选择原有数据库，以[java-sec-code](https://github.com/JoyChou93/java-sec-code)这个项目为例：
 
 ![image-20231120221439543](./README/image-20231120221439543.png)
 
