@@ -56,6 +56,28 @@ docker logs choccy
 
 
 
+镜像中包含了CodeQL环境，所以体积比较大，拉取速度很慢，建议科学上网并设置代理，Linux中设置方式如下：
+
+添加配置并设置代理：
+
+```shell
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo vim /etc/systemd/system/docker.service.d/proxy.conf
+```
+proxy.conf：
+```
+[Service]
+Environment="HTTP_PROXY=http://127.0.0.1:7890/"
+Environment="HTTPS_PROXY=http://127.0.0.1:7890/"
+Environment="NO_PROXY=localhost,127.0.0.1,*.163.com"
+```
+重启服务并查看是否生效：
+```shell
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo systemctl show --property=Environment docker
+```
+
 ### Docker Compose运行
 
 `docker-compose.yml` :
