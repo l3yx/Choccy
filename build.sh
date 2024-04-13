@@ -1,3 +1,4 @@
+rm -r ../Choccy/assets
 cd web
 npm install
 npm run build
