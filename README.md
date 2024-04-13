@@ -55,8 +55,8 @@ docker logs choccy
 另外CodeQL对性能有一定要求，配置过低的机器可能会运行非常缓慢或者失败。配置要求参考：https://docs.github.com/zh/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/recommended-hardware-resources-for-running-codeql
 
 
-
-镜像中包含了CodeQL环境，所以体积比较大，拉取速度很慢，建议科学上网并设置代理，Linux中设置方式如下：
+#### 镜像拉取失败说明
+镜像中包含了CodeQL环境，体积比较大，拉取速度很慢甚至会失败，建议科学上网并设置代理，Linux中设置方式如下：
 
 添加配置并设置代理：
 
