@@ -1,0 +1,16 @@
+- description: cpp security
+- queries: .
+  from: codeql/cpp-queries
+- include:
+    kind:
+    - problem
+    - path-problem
+    tags contain: security
+    problem.severity:
+    - error
+- exclude:
+    precision:
+    - low
+    - medium
+- exclude:
+    tags contain: experimental
