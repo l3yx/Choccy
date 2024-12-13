@@ -8,6 +8,39 @@ Choccy是一个用于监控GitHub仓库更新并自动对其进行CodeQL分析�
 
 
 
+## 运行
+
+运行前需要自行配置好代码编译环境，CodeQL环境：
+
+分别下载CodeQL二进制和库 https://github.com/github/codeql-cli-binaries/releases ，https://github.com/github/codeql/tags
+
+解压后与Choccy二进制文件放在同一目录下，即：
+
+```
+$ tree . -L 1
+.
+├── choccy
+├── codeql
+└── codeql-codeql-cli-v2.19.4
+```
+
+
+
+
+
+主要配置和功能都在Web界面，命令行参数只有两个：
+
+```
+-addr string
+      监听地址和端口 (default "0.0.0.0:80")
+-token string
+      系统Token
+```
+
+程序第一次运行时会在自身所在目录创建`choccy_data`文件夹用于保存数据，如果不指定token将会随机生成并输出到命令行，该项目本身有潜在的任意命令执行和文件读取等功能，所以如果服务开放于公网请务必设置强密码。
+
+
+
 ## 编译
 
 需要先进入web目录编译前端，编译golang后端时会自动嵌入前端资源文件。
@@ -26,97 +59,6 @@ go build -o choccy main.go
 ```
 
 
-
-## 运行
-
-### Docker运行
-
-```shell
-docker run \
--e TZ=Asia/Shanghai \
--v ~/choccy_data:/root/choccy_data \
--p 8080:80 \
---name choccy \
---restart always \
--d \
-l3yx/choccy ./choccy
-```
-
-查看系统初始Token：
-
-```shell
-docker logs choccy
-```
-
-
-
-在Docker容器中未配置各语言的编译环境，只预置了CodeQL二进制文件和官方库，所以默认只能选择`原有数据库`这个扫描模式，当然也可以自行在容器中安装各语言的编译环境并配置环境变量。
-
-另外CodeQL对性能有一定要求，配置过低的机器可能会运行非常缓慢或者失败。配置要求参考：https://docs.github.com/zh/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/recommended-hardware-resources-for-running-codeql
-
-
-#### 镜像拉取失败说明
-镜像中包含了CodeQL环境，体积比较大，拉取速度很慢甚至会失败，建议科学上网并设置代理，Linux中设置方式如下：
-
-添加配置并设置代理：
-
-```shell
-sudo mkdir -p /etc/systemd/system/docker.service.d
-sudo vim /etc/systemd/system/docker.service.d/proxy.conf
-```
-proxy.conf：
-```
-[Service]
-Environment="HTTP_PROXY=http://127.0.0.1:7890/"
-Environment="HTTPS_PROXY=http://127.0.0.1:7890/"
-Environment="NO_PROXY=localhost,127.0.0.1,*.163.com"
-```
-重启服务并查看是否生效：
-```shell
-sudo systemctl daemon-reload
-sudo systemctl restart docker
-sudo systemctl show --property=Environment docker
-```
-
-### Docker Compose运行
-
-`docker-compose.yml` :
-
-```yaml
-services:
-  choccy:
-    image: l3yx/choccy
-    container_name: choccy
-    environment:
-      TZ: "Asia/Shanghai"
-    entrypoint: ./choccy
-    volumes:
-      - ~/choccy_data:/root/choccy_data
-    ports:
-      - 8080:80
-    restart: always
-```
-
-```shell
-docker compose up -d
-```
-
-
-
-### 二进制文件运行
-
-运行前需要自行配置好代码编译环境，CodeQL环境，并设置环境变量。
-
-主要配置和功能都在Web界面，命令行参数只有两个：
-
-```
--addr string
-      监听地址和端口 (default "0.0.0.0:80")
--token string
-      系统Token
-```
-
-程序第一次运行时会在自身所在目录创建`choccy_data`文件夹用于保存数据，如果不指定token将会随机生成并输出到命令行，该项目本身有潜在的任意命令执行和文件读取等功能，所以如果服务开放于公网请务必设置强密码。
 
 
 
