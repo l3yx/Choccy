@@ -44,7 +44,10 @@ func InitSetting(storageDir string) {
 		setting.CodeQLSuite = filepath.Join(storageDir, "suites") + string(os.PathSeparator)
 		setting.CodeQLDatabase = filepath.Join(storageDir, "databases") + string(os.PathSeparator)
 		setting.CodeQLResult = filepath.Join(storageDir, "results") + string(os.PathSeparator)
-		setting.EnvStr = `#MAVEN_HOME=/usr/local/maven
+		setting.EnvStr = `CODEQL_HOME=${PWD}/codeql
+PATH=${CODEQL_HOME}:${PATH}
+
+#MAVEN_HOME=/usr/local/maven
 #PATH=${MAVEN_HOME}/bin:${PATH}
 
 #MAVEN_HOME=D:\maven
