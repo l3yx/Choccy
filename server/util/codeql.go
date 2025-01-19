@@ -220,7 +220,6 @@ func DatabaseCreate(source, language, command, databaseName string) (string, str
 
 	args := []string{"database", "create",
 		databasePath,
-		"--build-mode", "none",
 		"--language", language,
 		"--source-root", source,
 		"--threads", "0",
